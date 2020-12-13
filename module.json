@@ -14,9 +14,11 @@
 	],
 	"esmodules": [
 		"breaktime.js",
-    "settings.js"
+    		"settings.js"
 	],
-	"styles" : [],
+	"styles" : [
+		"breaktime.css"
+	],
 	"packs": [],
 	"url" : "https://github.com/ironmonk88/breaktime",
 	"download" : "https://github.com/ironmonk88/breaktime/archive/master.zip",
