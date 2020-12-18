@@ -1,1 +1,21 @@
 
+.breaktime-avatar
+{
+    width:50px;
+    height:50px;
+    display:inline-block;
+}
+
+.breaktime-details{
+    display:inline-block;
+    padding-top:5px;
+    vertical-align:top;
+}
+
+.breaktime-state{
+    color:#ff0000;
+}
+
+.breaktime-state.back {
+    color: #00ff00;
+}
