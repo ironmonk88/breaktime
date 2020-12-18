@@ -13,16 +13,18 @@
 		}
 	],
 	"esmodules": [
-		"breaktime.js",
-    		"settings.js"
+		"breaktime.js"
 	],
-	"styles" : [
+	"scripts": [
+		"breaktimeapp.js"
+	],
+	"styles": [
 		"breaktime.css"
 	],
 	"packs": [],
-	"url" : "https://github.com/ironmonk88/breaktime",
-	"download" : "https://github.com/ironmonk88/breaktime/archive/1.0.0.zip",
-	"manifest" : "https://raw.githubusercontent.com/ironmonk88/breaktime/main/module.json",
+	"url": "https://github.com/ironmonk88/breaktime",
+	"download": "https://github.com/ironmonk88/breaktime/archive/master.zip",
+	"manifest": "https://raw.githubusercontent.com/ironmonk88/breaktime/master/module.json",
 	"minimumCoreVersion": "0.7.1",
-  "compatibleCoreVersion": "0.7.5"
+	"compatibleCoreVersion": "0.7.5"
 }
