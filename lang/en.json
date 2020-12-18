@@ -1,2 +1,10 @@
 {
+  "BREAKTIME": {
+    "app": {
+      "title": "Break Time!"
+    },
+    "button": {
+      "title": "Step Away for a minute"
+    }
+  }
 }

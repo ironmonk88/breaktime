@@ -1,0 +1,18 @@
+<div class="breaktime-container">
+    <div class="breaktime-player-list">
+        {{#each players}}
+        <div class="breaktime-player">
+            <div class="breaktime-avatar">
+                <img src="{{avatar}}" />
+            </div>
+            <div class="breaktime-details">
+                <div class="breaktime-name">
+                    {{name}} [{{character}}]
+                </div>
+                <label class="breaktime-state{{#if state}} back{{/if}}">{{#if state}}Ready{{else}}Away{{/if}}</label>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    <button id="breaktime-btn">{{#if my.state}}Leave Again{{else}}I'm Back{{/if}}</button>
+</div>
