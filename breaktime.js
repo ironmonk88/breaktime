@@ -20,6 +20,13 @@ class BreakTime {
 
         BreakTime.SOCKET = "module.breaktime";
 
+        game.settings.register("breaktime", "paused", {
+            scope: "world",
+            config: false,
+            default: false,
+            type: Boolean,
+        });
+
         // init socket
         game.socket.on(BreakTime.SOCKET, (data) => {
             if (data.start == true) {
@@ -29,6 +36,11 @@ class BreakTime {
             } else if (data.away != undefined)
                 BreakTime.stepAway(data.away, data.senderId);
         });
+    }
+
+    static async ready() {
+        if (game.settings.get("breaktime", "paused"))
+            BreakTime.startBreak();
     }
 
     static pause() {
@@ -65,14 +77,20 @@ class BreakTime {
         });
 
         BreakTime.showDialog();
+        if(game.user.isGM)
+            game.settings.set("breaktime", "paused", true);
     }
 
     static async closeApp() {
         if (BreakTime.app != null) {
             BreakTime.app.close().then(() => {
                 BreakTime.app = null;
-                if (game.paused)
+                if (game.user.isGM && game.paused) {
                     game.togglePause(false, true);
+                    game.settings.set("breaktime", "paused", false);
+                }
+                else
+                    BreakTime.changeReturnedState(true);
             });
         }
     }
@@ -81,9 +99,9 @@ class BreakTime {
         BreakTime.app = new BreakTimeApplication().render(true);
     }
 
-    static changeReturnedState() {
+    static changeReturnedState(state) {
         var player = BreakTime.players.filter((el) => el.id == game.user._id)[0];
-        BreakTime.toggleReturned(game.user._id, !player.state);
+        BreakTime.toggleReturned(game.user._id, (state != undefined ? state : !player.state));
         game.socket.emit(
             BreakTime.SOCKET,
             {
@@ -97,7 +115,8 @@ class BreakTime {
     static toggleReturned(user, state) {
         var player = BreakTime.players.filter((el) => el.id == user)[0];
         player.state = state;
-        BreakTime.app.render(true);
+        if (BreakTime.app != undefined)
+            BreakTime.app.render(true);
     }
 
     static stepAway(away, userId) {
@@ -180,6 +199,7 @@ class BreakTimeApplication extends Application {
 }
 
 Hooks.once('init', BreakTime.init);
+Hooks.once('ready', BreakTime.ready);
 Hooks.on("pauseGame", BreakTime.pause);
 Hooks.on("closeBreakTimeApplication", BreakTime.closeApp);
 Hooks.on("getSceneControlButtons", BreakTime.addAwayButton);

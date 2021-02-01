@@ -19,3 +19,13 @@
 .breaktime-state.back {
     color: #468847;
 }
+
+/*
+.breaktime-player-list{
+    max-height:300px;
+    overflow-y:auto;
+}*/
+
+.breaktime-footer {
+    flex: 0 0 35px;
+}

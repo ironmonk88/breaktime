@@ -1,4 +1,4 @@
-<div class="breaktime-container">
+<div class="breaktime-container flexcol">
     <div class="breaktime-player-list">
         {{#each players}}
         <div class="breaktime-player">
@@ -14,5 +14,7 @@
         </div>
         {{/each}}
     </div>
-    <button id="breaktime-btn">{{#if my.state}}Leave Again{{else}}I'm Back{{/if}}</button>
+    <div class="breaktime-footer">
+        <button id="breaktime-btn">{{#if my.state}}Leave Again{{else}}I'm Back{{/if}}</button>
+    </div>
 </div>
