@@ -115,9 +115,11 @@ class BreakTime {
 
     static toggleReturned(user, state) {
         var player = BreakTime.players.filter((el) => el.id == user)[0];
-        player.state = state;
-        if (BreakTime.app != undefined)
-            BreakTime.app.render(true);
+        if(player != undefined){
+            player.state = state;
+            if (BreakTime.app != undefined)
+                BreakTime.app.render(true);
+        }
     }
 
     static stepAway(away, userId) {
