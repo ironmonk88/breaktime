@@ -85,8 +85,9 @@ class BreakTime {
         if (BreakTime.app != null) {
             BreakTime.app.close().then(() => {
                 BreakTime.app = null;
-                if (game.user.isGM && game.paused) {
-                    game.togglePause(false, true);
+                if (game.user.isGM) {
+                    if(game.paused)
+                        game.togglePause(false, true);
                     game.settings.set("breaktime", "paused", false);
                 }
                 else
