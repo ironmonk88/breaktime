@@ -115,7 +115,7 @@ class BreakTime {
 
     static toggleReturned(user, state) {
         var player = BreakTime.players.filter((el) => el.id == user)[0];
-        if(player != undefined){
+        if (player != undefined) {
             player.state = state;
             if (BreakTime.app != undefined)
                 BreakTime.app.render(true);
@@ -214,4 +214,26 @@ Hooks.on('renderPlayerList', (playerList, $html, data) => {
         $html.find(`[data-user-id="${userId}"]`).append(i);
         $html.find(`[data-user-id="${userId}"] .player-active`).css({background:'transparent'});
     });
+});
+
+Hooks.on("chatCommandsReady", function (chatCommands) {
+    chatCommands.registerCommand(chatCommands.createCommandFromData({
+        commandKey: "/brb",
+        invokeOnCommand: (chatlog, messageText, chatdata) => {
+            BreakTime.stepAway(true);
+        },
+        shouldDisplayToChat: false,
+        iconClass: "fa-door-open",
+        description: "Step away for a second"
+    }));
+
+    chatCommands.registerCommand(chatCommands.createCommandFromData({
+        commandKey: "/back",
+        invokeOnCommand: (chatlog, messageText, chatdata) => {
+            BreakTime.stepAway(false);
+        },
+        shouldDisplayToChat: false,
+        iconClass: "fa-door-closed",
+        description: "Return to the game"
+    }));
 });
