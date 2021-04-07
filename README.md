@@ -13,6 +13,9 @@ Players can also show when they've stepped away for a second by pressing the doo
 
 ![Away Indicator](/screenshots/away_indicator.png)
 
+## Library: Chat Commands
+BreakTime also supports the Chat Commands Library. /brb and /back are registered commands and can be used to step away return to the game, respectively.
+
 ## Support
 
 If you feel like being generous, stop by my <a href="https://www.patreon.com/ironmonk">patreon</a>.  Not necessary but definitely appreciated.
