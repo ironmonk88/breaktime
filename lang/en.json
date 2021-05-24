@@ -1,7 +1,11 @@
 {
   "BREAKTIME": {
     "app": {
-      "title": "Break Time!"
+      "title": "Break Time!",
+      "away": "I'm stepping away for a second.",
+      "back": "I'm back.",
+      "chataway": "Step away for a second",
+      "chatback": "Return to the game"
     },
     "button": {
       "title": "Step Away for a minute"
