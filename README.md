@@ -5,11 +5,14 @@ Foundry VTT module to show when players have returned from a break or to display
 Simply use the install module screen within the FoundryVTT setup
 
 ## Usage & Current Features
-To open the away screen hold down the shift key before pressing the space key to pause the game.  Each player should see the dialog screen and can press the button at the bottom to register when they're back from they're break.  Unpausing the game will close the dialog, and closing the dialog will un pause the game.
+To open the away screen hold down the Shift and Home key to open the Breaktime wondow.  Each player should see the dialog screen and can press the button at the bottom to register when they're back from they're break.
+
+The Shift/Home key combination can be changed in the settings if you'd prefer a different combination.
+By default Breaktime can pause and unpause the game when the dialog is opened.
 
 ![Away Dialog](/screenshots/away_dialog.png)
 
-Players can also show when they've stepped away for a second by pressing the doot icon on the token menu.  This will send a message to the chat window (if a message has been filled in) and display the player with an empty dot and a door beside their name.
+Players can also show when they've stepped away for a second by pressing the door icon on the token menu.  This will send a message to the chat window (if a message has been filled in) and display the player with an empty dot and a door beside their name.
 
 ![Away Indicator](/screenshots/away_indicator.png)
 
