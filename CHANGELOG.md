@@ -1,4 +1,4 @@
-## Version 1.0.8
+## Version 1.0.9
 
 Added support for lib DF Hotkeys so that you can customize what key will activate breaktime.  Unfortunately this means you can no longer use shift space as the space key is a bit of a protected key.  I've changed it to Shift-Home.  Hopefully this isn't a huge transition.  And was kind of needed to extract it from being so closely linked to pausing the game.
 
