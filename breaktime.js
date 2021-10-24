@@ -38,6 +38,18 @@ export class BreakTime {
             BreakTime.showApp();
 
         BreakTime.registerHotKeys();
+
+        if (setting('use-space')) {
+            let oldSpace = game.keyboard._onSpace;
+            game.keyboard._onSpace = function _onSpace(event, up, modifiers) {
+                if (game.user.isGM && !up && modifiers.isShift) {
+                    event.preventDefault();
+                    BreakTime.startBreak();
+                    return this._handled.add(modifiers.key);
+                } else
+                    return oldSpace.call(this, event, up, modifiers);
+            }
+        }
     }
 
     static emit(action, args = {}) {

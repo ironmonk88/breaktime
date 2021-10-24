@@ -4,6 +4,8 @@ export const registerSettings = function () {
     // Register any custom module settings here
 	let modulename = "breaktime";
 
+	const debouncedReload = foundry.utils.debounce(function () { window.location.reload(); }, 100);
+
 	game.settings.register("breaktime", "paused", {
 		scope: "world",
 		config: false,
@@ -50,6 +52,17 @@ export const registerSettings = function () {
 		config: true,
 		default: true,
 		type: Boolean,
+		onChange: debouncedReload,
+	});
+
+	game.settings.register(modulename, "use-space", {
+		name: i18n("BREAKTIME.setting.use-space.name"),
+		hint: i18n("BREAKTIME.setting.use-space.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+		onChange: debouncedReload,
 	});
 
 	game.settings.register(modulename, "away-text", {

@@ -1,3 +1,7 @@
+## Version 1.0.11
+
+Added option to turn Shift Space back on.
+
 ## Version 1.0.10
 
 Rebuilt the app, the interface should refresh properly and keep track of the players that are away a little better.  Second app I created so there was a lot I could do better.
