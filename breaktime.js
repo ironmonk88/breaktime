@@ -1,4 +1,5 @@
 import { registerSettings } from "./settings.js";
+import { BreakTimeApplication } from "./breaktimeapp.js";
 
 export let debug = (...args) => {
     if (debugEnabled > 1) console.log("DEBUG: breaktime | ", ...args);
@@ -16,282 +17,191 @@ export let setting = key => {
     return game.settings.get("breaktime", key);
 };
 
-class BreakTime {
+export class BreakTime {
     static app = null;
-    static players = [];
-    static awayUsers = new Set();
 
     static async init() {
         log("initializing");
 
         BreakTime.SOCKET = "module.breaktime";
 
-        registerSettings();
-
         // init socket
-        game.socket.on(BreakTime.SOCKET, (data) => {
-            if (data.start == true) {
-                BreakTime.showDialog();
-            }else if (data.end == true) {
-                BreakTime.closeApp();
-            } else if (data.state != undefined) {
-                BreakTime.toggleReturned(data.senderId, data.state);
-            } else if (data.away != undefined)
-                BreakTime.stepAway(data.away, data.senderId);
-        });
+        game.socket.on(BreakTime.SOCKET, BreakTime.onMessage);
+    }
+
+    static async setup() {
+        registerSettings();
     }
 
     static async ready() {
-        if (game.settings.get("breaktime", "paused"))
-            BreakTime.showDialog();
+        if (setting("paused"))
+            BreakTime.showApp();
 
         BreakTime.registerHotKeys();
-        /*
-        let oldSpace = game.keyboard._onSpace;
-        game.keyboard._onSpace = function _onSpace(event, up, modifiers) {
-            if (game.user.isGM && !up && modifiers.isShift) {
-                event.preventDefault();
-                game.togglePause(undefined, true);
-                return this._handled.add(modifiers.key);
-            } else
-                return oldSpace.call(this, event, up, modifiers);
-        }*/
     }
 
-    /*
-    static pause() {
-        //if this is the GM and shift is being held down, then start a break time
-        log('Paused', game.paused);
-        if (game.paused) {
-            if (game.user.isGM && game.keyboard.isDown("Shift")) {
-                game.socket.emit(
-                    BreakTime.SOCKET,
-                    {
-                        senderId: game.user.id,
-                        start: true
-                    },
-                    (resp) => { }
-                );
-                BreakTime.startBreak();
-            }
-        } else {
-            BreakTime.closeApp();
-        }
-    }*/
-
-    static getPlayers() {
-        //find all active users, including the GM
-        BreakTime.players = game.users.contents.filter((el) => el.active).map((el) => {
-            return {
-                name: el.name,
-                id: el.id,
-                avatar: el.avatar,
-                color: el.color,
-                character: (el.isGM ? "GM" : el?.character?.name),
-                self: el.isSelf,
-                state: false
-            };
-        });
-
-        log('Getting players:', BreakTime.players);
+    static emit(action, args = {}) {
+        args.action = action;
+        args.senderId = game.user.id;
+        game.socket.emit(BreakTime.SOCKET, args, (resp) => { });
+        BreakTime.onMessage(args);
     }
 
-    static startBreak() {
-        game.socket.emit(
-            BreakTime.SOCKET,
-            {
-                senderId: game.user.id,
-                start: true
-            },
-            (resp) => { }
-        );
-
-        BreakTime.showDialog();
-        if (setting('auto-pause'))
-            game.togglePause(true, true);
-        if(game.user.isGM)
-            game.settings.set("breaktime", "paused", true);
-    }
-
-    static async closeApp() {
-        if (BreakTime.app != null) {
-            BreakTime.app.close().then(() => {
-                BreakTime.app = null;
-                if (game.user.isGM) {
-                    if (setting('auto-pause') && game.paused)
-                        game.togglePause(false, true);
-                    game.settings.set("breaktime", "paused", false);
-                    game.socket.emit(
-                        BreakTime.SOCKET,
-                        {
-                            senderId: game.user.id,
-                            end: true
-                        },
-                        (resp) => { }
-                    );
-                }
-                else
-                    BreakTime.changeReturnedState(true);
-            });
-        }
-    }
-
-    static showDialog() {
-        if (BreakTime.app == null) {
-            BreakTime.getPlayers();
-            BreakTime.app = new BreakTimeApplication().render(true);
-        } else
-            BreakTime.app.render(true);
-    }
-
-    static changeReturnedState(state) {
-        var player = BreakTime.players.filter((el) => el.id == game.user.id)[0];
-        BreakTime.toggleReturned(game.user.id, (state != undefined ? state : !player.state));
-        game.socket.emit(
-            BreakTime.SOCKET,
-            {
-                senderId: game.user.id,
-                state: player.state
-            },
-            (resp) => { }
-        );
-    }
-
-    static toggleReturned(user, state) {
-        var player = BreakTime.players.filter((el) => el.id == user)[0];
-        if (player != undefined) {
-            player.state = state;
-            if (BreakTime.app != undefined)
-                BreakTime.app.render(true);
-        }
-    }
-
-    static stepAway(away, userId) {
-        if (userId == undefined)
-            userId = game.user.id;
-        if (BreakTime.awayUsers.has(userId) && away === false)
-            BreakTime.awayUsers.delete(userId);
-        else if (!BreakTime.awayUsers.has(userId) && away === true)
-            BreakTime.awayUsers.add(userId);
-
-        //send message declaring if you're back
-        if (userId == game.user.id) {
-            const isaway = BreakTime.awayUsers.has(userId);
-
-            const messageData = {
-                content: i18n(isaway ? "BREAKTIME.app.away" : "BREAKTIME.app.back"),
-                type: CONST.CHAT_MESSAGE_TYPES.OOC
-            };
-            ChatMessage.create(messageData);
-
-            game.socket.emit(
-                BreakTime.SOCKET,
-                {
-                    senderId: game.user.id,
-                    away: isaway
-                },
-                (resp) => { }
-            );
-        }
-
-        ui.players.render();
-    }
-
-    static addAwayButton(controls) {
-        let tokenControls = controls.find(control => control.name === "token")
-        tokenControls.tools.push({
-            name: "togglebreak",
-            title: "BREAKTIME.button.title",
-            icon: "fas fa-door-open",
-            onClick: BreakTime.stepAway,
-            toggle: true
-        });
-        /*controls.push({
-            name: "togglebreak",
-            title: "BREAKTIME.button.title",
-            icon: "fas fa-door-open",
-            onClick: BreakTime.stepAway,
-            toggle: true
-        });*/
+    static onMessage(data) {
+        BreakTime[data.action].call(BreakTime, data);
     }
 
     static registerHotKeys() {
         if (game.user.isGM) {
             Hotkeys.registerGroup({
                 name: 'breaktime-pause-key',
-                label: 'BreakTime, Pause Key',
-                description: 'Use this key to activate BreakTime'
+                label: i18n("BREAKTIME.hotkey.label"),
+                description: i18n("BREAKTIME.hotkey.description")
             });
 
             Hotkeys.registerShortcut({
                 name: `breaktime-pause`,
-                label: `Pause Key`,
+                label: i18n("BREAKTIME.hotkey.pausekey"),
                 group: 'breaktime-pause-key',
                 default: () => { return { key: Hotkeys.keys.Home, alt: false, ctrl: false, shift: true }; },
                 onKeyDown: (e) => {
-                    BreakTime.startBreak();
+                    if (game.user.isGM) BreakTime.startBreak();
                 }
             });
         }
     }
-}
 
-class BreakTimeApplication extends Application {
+    static async startBreak() {
+        await game.settings.set("breaktime", "break", {});
+        await game.settings.set("breaktime", "paused", true);
+        BreakTime.emit("showApp");
 
-    static get defaultOptions() {
-        const options = super.defaultOptions;
-        options.title = `${game.i18n.localize("BREAKTIME.app.title")}`;
-        options.id = "breaktime-app";
-        options.template = "modules/breaktime/templates/breaktime.html";
-        options.width = 300;
-        options.resizable = false;
-        return options;
+        //BreakTime.showDialog();
+        if (setting('auto-pause'))
+            game.togglePause(true, true);
     }
 
-    getData() {
-        var player = BreakTime.players.filter((el) => el.id == game.user.id)[0];
-        return {
-            players: BreakTime.players,
-            my: player
+    static async endBreak() {
+        if (setting('auto-pause') && game.paused)
+            game.togglePause(false, true);
+        await game.settings.set("breaktime", "paused", false);
+        BreakTime.emit("closeApp");
+    }
+
+    static showApp() {
+        if (BreakTime.app == null)
+            BreakTime.app = new BreakTimeApplication().render(true);
+        else
+            BreakTime.app.render(true);
+    }
+
+    static async closeApp() {
+        if (BreakTime.app != null && BreakTime.app.rendered) {
+            BreakTime.app.close({ ignore: true }).then(() => {
+                BreakTime.app = null;
+            });
+        } else
+            BreakTime.app = null;
+    }
+
+    static async changeReturned(data) {
+        if (game.user.isGM) {
+            let userId = data.senderId || game.user.id;
+            let state = (data.state != undefined ? data.state : !setting("break")[userId]);
+            let players = setting("break");
+            players[userId] = state;
+            await game.settings.set("breaktime", "break", players);
+            BreakTime.emit("refresh");
         }
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
-        this.element.find("#breaktime-btn").click(this._changeReturnedState.bind(this))
+    static async stepAway(data = {}) {
+        let userId = data.senderId || game.user.id;
+
+        if (game.user.isGM) {
+            let players = setting("away");
+
+            if (players.includes(userId) && data.away === false)
+                players.findSplice((id) => id == userId);
+            else if (!players.includes(userId) && data.away === true)
+                players.push(userId);
+
+            await game.settings.set("breaktime", "away", players);
+            BreakTime.emit("refreshPlayerUI");
+        }
+
+        //send message declaring if you're back
+        if (userId == game.user.id) {
+            const message = data.message || i18n(data.away ? setting("away-text") : setting("back-text"));
+
+            const messageData = {
+                content: message,
+                type: CONST.CHAT_MESSAGE_TYPES.OOC
+            };
+            ChatMessage.create(messageData);
+
+            let tool = ui.controls.controls.find(c => c.name == 'token')?.tools.find(t => t.name == 'togglebreak');
+            if(tool) tool.active = data.away;
+            ui.controls.render();
+        }
     }
 
-    _changeReturnedState() {
-        BreakTime.changeReturnedState();
+    static refresh() {
+        if (BreakTime.app && BreakTime.app.rendered)
+            BreakTime.app.render();
+    }
+
+    static refreshPlayerUI() {
+        ui.players.render();
     }
 }
 
 Hooks.once('init', BreakTime.init);
+Hooks.once('setup', BreakTime.setup);
 Hooks.once('ready', BreakTime.ready);
 //Hooks.on("pauseGame", BreakTime.pause);
-Hooks.on("closeBreakTimeApplication", BreakTime.closeApp);
-Hooks.on("getSceneControlButtons", BreakTime.addAwayButton);
-Hooks.on('renderPlayerList', async (playerList, $html, data) => {
-    BreakTime.getPlayers();
-    if (BreakTime.app) {
+//Hooks.on("closeBreakTimeApplication", BreakTime.closeApp);
+Hooks.on("getSceneControlButtons", (controls) => {
+    let tokenControls = controls.find(control => control.name === "token")
+    tokenControls.tools.push({
+        name: "togglebreak",
+        title: "BREAKTIME.button.title",
+        icon: "fas fa-door-open",
+        onClick: (away) => {
+            BreakTime.emit("stepAway", { away: away });
+        },
+        toggle: true,
+        active: setting("away").includes(game.user.id)
+    });
+});
+
+Hooks.on('renderPlayerList', async (playerList, html, data) => {
+    //BreakTime.getPlayers();
+    if (BreakTime.app && BreakTime.app.rendered) {
         BreakTime.app.render(true);
-        window.setTimeout(function () { BreakTime.app.setPosition(); }, 500);
     }
 
-    BreakTime.awayUsers.forEach((userId) => {
+    setting("away").forEach((userId) => {
         const styles = `flex:0 0 17px;width:17px;height:16px;border:0`;
-        const title = `Player is currently away`
+        const title = i18n("BREAKTIME.app.playerisaway")
         const i = `<i style="${styles}" class="fas fa-door-open" title="${title}"></i>`;
-        $html.find(`[data-user-id="${userId}"]`).append(i);
-        $html.find(`[data-user-id="${userId}"] .player-active`).css({background:'transparent'});
+        html.find(`[data-user-id="${userId}"]`).append(i);
+        html.find(`[data-user-id="${userId}"] .player-active`).css({background:'transparent'});
     });
+
+    if (setting('show-button') && game.user.isGM) {
+        $('<h3>').addClass('breaktime-button')
+            .append(`<div><i class="fas fa-coffee"></i> ${i18n("BREAKTIME.app.breaktime")}</div>`)
+            .insertAfter($('h3', html))
+            .click(BreakTime.startBreak.bind());
+    }
 });
 
 Hooks.on("chatCommandsReady", function (chatCommands) {
     chatCommands.registerCommand(chatCommands.createCommandFromData({
         commandKey: "/brb",
         invokeOnCommand: (chatlog, messageText, chatdata) => {
-            BreakTime.stepAway(true);
+            BreakTime.emit("stepAway", { away: true, message: messageText });
         },
         shouldDisplayToChat: false,
         iconClass: "fa-door-open",
@@ -301,7 +211,7 @@ Hooks.on("chatCommandsReady", function (chatCommands) {
     chatCommands.registerCommand(chatCommands.createCommandFromData({
         commandKey: "/back",
         invokeOnCommand: (chatlog, messageText, chatdata) => {
-            BreakTime.stepAway(false);
+            BreakTime.emit("stepAway", { away: false, message: messageText });
         },
         shouldDisplayToChat: false,
         iconClass: "fa-door-closed",

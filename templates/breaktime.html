@@ -1,20 +1,19 @@
-<div class="breaktime-container flexcol">
-    <div class="breaktime-player-list">
+<form class="flexcol" editable="{{editable}}">
+    <div class="breaktime-container flexcol">
         {{#each players}}
-        <div class="breaktime-player">
+        <div class="breaktime-player{{#if state}} back{{/if}}" data-user-id="{{userId}}">
             <div class="breaktime-avatar">
                 <img src="{{avatar}}" />
             </div>
             <div class="breaktime-details">
                 <div class="breaktime-name">
-                    {{name}} [{{character}}]
+                    {{name}}
                 </div>
-                <label class="breaktime-state{{#if state}} back{{/if}}">{{#if state}}Ready{{else}}Away{{/if}}</label>
+                <label class="breaktime-character">{{character}}</label>
             </div>
+            <div class="breaktime-marker"><i class="fas {{#if state}}fa-check{{else}}{{/if}}"></i></div>
         </div>
         {{/each}}
     </div>
-    <div class="breaktime-footer">
-        <button id="breaktime-btn">{{#if my.state}}Leave Again{{else}}I'm Back{{/if}}</button>
-    </div>
-</div>
+    <button id="breaktime-btn" type="button">{{#if my.state}}<i class="fas fa-door-open"></i> {{localize 'BREAKTIME.app.LeaveAgain'}}{{else}}<i class="fas fa-door-closed"></i> {{localize 'BREAKTIME.app.ImBack'}}{{/if}}</button>
+</form>

@@ -2,10 +2,39 @@
   "BREAKTIME": {
     "app": {
       "title": "Break Time!",
+      "breaktime": "Breaktime",
       "away": "I'm stepping away for a second.",
       "back": "I'm back.",
       "chataway": "Step away for a second",
-      "chatback": "Return to the game"
+      "chatback": "Return to the game",
+      "playerisaway": "Player is currently away",
+      "LeaveAgain": "Leave Again",
+      "ImBack": "I'm Back"
+    },
+    "setting": {
+      "hot-keys": {
+        "name": "Change Hotkeys",
+        "hint": "Change the hotkeys that this module uses"
+      },
+      "auto-pause": {
+        "name": "Automatically Pause",
+        "hint": "Automatically pause when opening up the Breaktime window"
+      },
+      "show-button": {
+        "name": "Show Button",
+        "hint": "Show button on player window"
+      },
+      "away-text": {
+        "name": "Away Message"
+      },
+      "back-text": {
+        "name": "Back Message"
+      }
+    },
+    "hotkey": {
+      "label": "BreakTime, Pause Key",
+      "description": "Use this key to activate BreakTime",
+      "pausekey": "Pause Key"
     },
     "button": {
       "title": "Step Away for a minute"
