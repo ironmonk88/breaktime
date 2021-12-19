@@ -27,15 +27,6 @@ export const registerSettings = function () {
 		type: Object,
 	});
 
-	game.settings.registerMenu(modulename, 'hot-keys', {
-		name: i18n("BREAKTIME.setting.hot-keys.name"),
-		label: i18n("BREAKTIME.setting.hot-keys.name"),
-		hint: i18n("BREAKTIME.setting.hot-keys.hint"),
-		icon: 'fas fa-keyboard',
-		restricted: true,
-		type: Hotkeys.createConfig('Breaktime', ['breaktime'])
-	});
-
 	game.settings.register(modulename, "auto-pause", {
 		name: i18n("BREAKTIME.setting.auto-pause.name"),
 		hint: i18n("BREAKTIME.setting.auto-pause.hint"),
@@ -51,16 +42,6 @@ export const registerSettings = function () {
 		scope: "world",
 		config: true,
 		default: true,
-		type: Boolean,
-		onChange: debouncedReload,
-	});
-
-	game.settings.register(modulename, "use-space", {
-		name: i18n("BREAKTIME.setting.use-space.name"),
-		hint: i18n("BREAKTIME.setting.use-space.hint"),
-		scope: "world",
-		config: true,
-		default: false,
 		type: Boolean,
 		onChange: debouncedReload,
 	});

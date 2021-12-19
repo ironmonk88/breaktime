@@ -1,3 +1,11 @@
+## Version 1.0.12
+
+Adding support for v9
+
+Changed the images to grayscale if the player is away and changed the red border to gray.  Red was kind of giving the impression that something was wrong, and there wasn't anything wrong, they player was just not active.
+
+Hotkeys are now being handled by Foundry, as such... I can return the shift space functionality without causing issues.  All this is editable so iyou can change the keys depending on what suits you best.
+
 ## Version 1.0.11
 
 Added option to turn Shift Space back on.

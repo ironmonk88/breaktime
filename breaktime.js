@@ -27,6 +27,7 @@ export class BreakTime {
 
         // init socket
         game.socket.on(BreakTime.SOCKET, BreakTime.onMessage);
+        BreakTime.registerHotKeys();
     }
 
     static async setup() {
@@ -36,20 +37,6 @@ export class BreakTime {
     static async ready() {
         if (setting("paused"))
             BreakTime.showApp();
-
-        BreakTime.registerHotKeys();
-
-        if (setting('use-space')) {
-            let oldSpace = game.keyboard._onSpace;
-            game.keyboard._onSpace = function _onSpace(event, up, modifiers) {
-                if (game.user.isGM && !up && modifiers.isShift) {
-                    event.preventDefault();
-                    BreakTime.startBreak();
-                    return this._handled.add(modifiers.key);
-                } else
-                    return oldSpace.call(this, event, up, modifiers);
-            }
-        }
     }
 
     static emit(action, args = {}) {
@@ -64,23 +51,19 @@ export class BreakTime {
     }
 
     static registerHotKeys() {
-        if (game.user.isGM) {
-            Hotkeys.registerGroup({
-                name: 'breaktime-pause-key',
-                label: i18n("BREAKTIME.hotkey.label"),
-                description: i18n("BREAKTIME.hotkey.description")
-            });
-
-            Hotkeys.registerShortcut({
-                name: `breaktime-pause`,
-                label: i18n("BREAKTIME.hotkey.pausekey"),
-                group: 'breaktime-pause-key',
-                default: () => { return { key: Hotkeys.keys.Home, alt: false, ctrl: false, shift: true }; },
-                onKeyDown: (e) => {
-                    if (game.user.isGM) BreakTime.startBreak();
-                }
-            });
-        }
+        game.keybindings.register('breaktime', 'breaktime-pause', {
+            name: 'BREAKTIME.hotkey.pausekey',
+            restricted: true,
+            editable: [
+                { key: 'KeyHome', modifiers: [KeyboardManager.MODIFIER_KEYS?.SHIFT] },
+                { key: 'Space', modifiers: [KeyboardManager.MODIFIER_KEYS?.SHIFT] }
+            ],
+            onDown: () => {
+                if (game.user.isGM)
+                    BreakTime.startBreak();
+                return true;
+            }
+        });
     }
 
     static async startBreak() {

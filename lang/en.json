@@ -24,10 +24,6 @@
         "name": "Show Button",
         "hint": "Show button on player window"
       },
-      "use-space": {
-        "name": "Use Shift Space",
-        "hint": "Hotkeys doesn't allow space to be used, select this if you want to use the old Shift Space functionality"
-      },
       "away-text": {
         "name": "Away Message"
       },
