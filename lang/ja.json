@@ -1,0 +1,44 @@
+{
+  "Localization Provided By": "Brother Sharp",
+  "BREAKTIME": {
+    "app": {
+      "title": "ちょっと休憩しましょう！",
+      "breaktime": "休憩時間",
+      "away": "離席します",
+      "back": "戻りました",
+      "chataway": "離席",
+      "chatback": "復帰",
+      "playerisaway": "プレイヤーは現在離席中です",
+      "LeaveAgain": "再度離席",
+      "ImBack": "戻りました"
+    },
+    "setting": {
+      "hot-keys": {
+        "name": "ショートカット変更",
+        "hint": "このModが使用するショートカットを変更します。"
+      },
+      "auto-pause": {
+        "name": "自動的に一時停止",
+        "hint": "Breaktimeウィンドウが開いた時、自動的にゲームが一時停止します。"
+      },
+      "show-button": {
+        "name": "離席ボタン",
+        "hint": "プレイヤーのウィンドウに離席ボタンを表示します。"
+      },
+      "away-text": {
+        "name": "離席メッセージ"
+      },
+      "back-text": {
+        "name": "復帰メッセージ"
+      }
+    },
+    "hotkey": {
+      "label": "BreakTime、一時停止キー",
+      "description": "BreakTimeをこのキーで起動します。",
+      "pausekey": "一時停止キー"
+    },
+    "button": {
+      "title": "少し離席"
+    }
+  }
+}
