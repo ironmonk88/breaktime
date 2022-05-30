@@ -35,8 +35,9 @@ export class BreakTime {
     }
 
     static async ready() {
-        if (setting("paused"))
+        if (setting("paused")) {
             BreakTime.showApp();
+        }
     }
 
     static emit(action, args = {}) {
@@ -67,13 +68,18 @@ export class BreakTime {
     }
 
     static async startBreak() {
-        await game.settings.set("breaktime", "break", {});
-        await game.settings.set("breaktime", "paused", true);
-        BreakTime.emit("showApp");
+        if (setting("paused"))
+            BreakTime.showApp();
+        else {
+            await game.settings.set("breaktime", "break", {});
+            await game.settings.set("breaktime", "start", Date.now());
+            await game.settings.set("breaktime", "paused", true);
+            BreakTime.emit("showApp");
 
-        //BreakTime.showDialog();
-        if (setting('auto-pause'))
-            game.togglePause(true, true);
+            //BreakTime.showDialog();
+            if (setting('auto-pause'))
+                game.togglePause(true, true);
+        }
     }
 
     static async endBreak() {
@@ -88,6 +94,8 @@ export class BreakTime {
             BreakTime.app = new BreakTimeApplication().render(true);
         else
             BreakTime.app.render(true);
+        if (!game.user.isGM)
+            ui.players.render();
     }
 
     static async closeApp() {
@@ -97,11 +105,13 @@ export class BreakTime {
             });
         } else
             BreakTime.app = null;
+        if (!game.user.isGM)
+            ui.players.render();
     }
 
     static async changeReturned(data) {
         if (game.user.isGM) {
-            let userId = data.senderId || game.user.id;
+            let userId = data.userId || data.senderId || game.user.id;
             let state = (data.state != undefined ? data.state : !setting("break")[userId]);
             let players = setting("break");
             players[userId] = state;
@@ -154,8 +164,7 @@ export class BreakTime {
 Hooks.once('init', BreakTime.init);
 Hooks.once('setup', BreakTime.setup);
 Hooks.once('ready', BreakTime.ready);
-//Hooks.on("pauseGame", BreakTime.pause);
-//Hooks.on("closeBreakTimeApplication", BreakTime.closeApp);
+
 Hooks.on("getSceneControlButtons", (controls) => {
     let tokenControls = controls.find(control => control.name === "token")
     tokenControls.tools.push({
@@ -184,11 +193,11 @@ Hooks.on('renderPlayerList', async (playerList, html, data) => {
         html.find(`[data-user-id="${userId}"] .player-active`).css({background:'transparent'});
     });
 
-    if (setting('show-button') && game.user.isGM) {
+    if (setting('show-button') && (game.user.isGM || (!game.user.isGM && setting("paused")))) {
         $('<h3>').addClass('breaktime-button')
             .append(`<div><i class="fas fa-coffee"></i> ${i18n("BREAKTIME.app.breaktime")}</div>`)
             .insertAfter($('h3', html))
-            .click(BreakTime.startBreak.bind());
+            .click(game.user.isGM ? BreakTime.startBreak.bind() : BreakTime.showApp.bind());
     }
 });
 

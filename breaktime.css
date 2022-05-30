@@ -59,3 +59,12 @@
     cursor: pointer;
     filter: drop-shadow( 0 0 5px red);
 }
+
+form .notes.break-start {
+    flex: 0 0 20px;
+}
+
+.breaktime-container {
+    padding-top: 4px;
+    border-top: 1px solid #C0C0C0;
+}

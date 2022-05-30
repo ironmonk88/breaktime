@@ -22,7 +22,7 @@
       },
       "show-button": {
         "name": "Show Button",
-        "hint": "Show button on player window"
+        "hint": "Show button on players list window"
       },
       "away-text": {
         "name": "Away Message"

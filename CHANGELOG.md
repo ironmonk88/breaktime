@@ -1,3 +1,13 @@
+## Version 1.0.14
+
+Added the time that the break started at the top of the dialog.
+
+Added the option for the GM to click on a player avatar to change their away status
+
+Updated the the players listing to display the breaktime button for players when the Dialog is open.  Just in case the player closes the dialog they can now reopen it.
+
+Added japanese language support.  thank you Brother Sharp!
+
 ## Version 1.0.12
 
 Adding support for v9

@@ -1,7 +1,8 @@
 <form class="flexcol" editable="{{editable}}">
+    <p class="notes break-start">Break was started at {{timestart}}.</p>
     <div class="breaktime-container flexcol">
         {{#each players}}
-        <div class="breaktime-player{{#if state}} back{{/if}}" data-user-id="{{userId}}">
+        <div class="breaktime-player{{#if state}} back{{/if}}" data-user-id="{{this.id}}">
             <div class="breaktime-avatar">
                 <img src="{{avatar}}" />
             </div>

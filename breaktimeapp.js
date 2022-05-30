@@ -31,17 +31,31 @@ export class BreakTimeApplication extends Application {
         return mergeObject(super.getData(), {
             players: players,
             my: me,
-            gm: game.user.isGM
+            gm: game.user.isGM,
+            timestart: new Date(setting("start")).toLocaleTimeString('en-US', {
+                hour: "numeric",
+                minute: "numeric",
+                second: "numeric"
+            }),
         });
     }
 
     activateListeners(html) {
         super.activateListeners(html);
-        this.element.find("#breaktime-btn").click(this._changeReturnedState.bind(this))
+        this.element.find("#breaktime-btn").click(this._changeReturnedState.bind(this));
+
+        if (game.user.isGM) {
+            this.element.find(".breaktime-avatar").click(this._changePlayerState.bind(this));
+        }
     }
 
     _changeReturnedState() {
         BreakTime.emit("changeReturned");
+    }
+
+    _changePlayerState(event) {
+        let playerId = event.currentTarget.closest('.breaktime-player').dataset.userId;
+        BreakTime.emit("changeReturned", { userId: playerId });
     }
 
     async close(options = {}) {

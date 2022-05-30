@@ -27,6 +27,13 @@ export const registerSettings = function () {
 		type: Object,
 	});
 
+	game.settings.register("breaktime", "start", {
+		scope: "world",
+		config: false,
+		default: {},
+		type: Object,
+	});
+
 	game.settings.register(modulename, "auto-pause", {
 		name: i18n("BREAKTIME.setting.auto-pause.name"),
 		hint: i18n("BREAKTIME.setting.auto-pause.hint"),
