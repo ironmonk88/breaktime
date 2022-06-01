@@ -18,7 +18,7 @@
       },
       "auto-pause": {
         "name": "Automatisches Pausieren",
-        "hint": "Pausiert das Spiel automatisch, wenn das Spielpausefenster geöffnet wird."
+        "hint": "Pausiert das Spiel automatisch, wenn das Spielpausefenster geöffnet wird"
       },
       "show-button": {
         "name": "Schaltfläche anzeigen",
