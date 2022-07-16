@@ -56,7 +56,7 @@ export class BreakTime {
             name: 'BREAKTIME.hotkey.pausekey',
             restricted: true,
             editable: [
-                { key: 'KeyHome', modifiers: [KeyboardManager.MODIFIER_KEYS?.SHIFT] },
+                { key: 'Home', modifiers: [KeyboardManager.MODIFIER_KEYS?.SHIFT] },
                 { key: 'Space', modifiers: [KeyboardManager.MODIFIER_KEYS?.SHIFT] }
             ],
             onDown: () => {
