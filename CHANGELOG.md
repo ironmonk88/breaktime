@@ -1,3 +1,7 @@
+## Version 1.0.15
+
+Adding support for v10
+
 ## Version 1.0.14
 
 Added the time that the break started at the top of the dialog.
