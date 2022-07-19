@@ -1,0 +1,43 @@
+{
+  "BREAKTIME": {
+    "app": {
+      "title": "Spielpause!",
+      "breaktime": "Spielpause",
+      "away": "Ich bin kurz weg.",
+      "back": "Ich bin wieder da.",
+      "chataway": "Kurz weggehen",
+      "chatback": "Zum Spiel zurückkehren",
+      "playerisaway": "Der Spieler ist zur Zeit abwesend",
+      "LeaveAgain": "Noch mal weggehen",
+      "ImBack": "Ich bin wieder da"
+    },
+    "setting": {
+      "hot-keys": {
+        "name": "Tastenbelegung ändern",
+        "hint": "Ändere die Tastenbelegung für dieses Modul"
+      },
+      "auto-pause": {
+        "name": "Automatisches Pausieren",
+        "hint": "Pausiert das Spiel automatisch, wenn das Spielpausefenster geöffnet wird"
+      },
+      "show-button": {
+        "name": "Schaltfläche anzeigen",
+        "hint": "Schaltfläche in der Spielerübersicht anzeigen"
+      },
+      "away-text": {
+        "name": "Nachricht beim Weggehen"
+      },
+      "back-text": {
+        "name": "Nachricht beim Zurückkommen"
+      }
+    },
+    "hotkey": {
+      "label": "BreakTime, Pausetaste",
+      "description": "Benutze diese Taste um eine Spielpause zu beginnen",
+      "pausekey": "Pausetaste"
+    },
+    "button": {
+      "title": "Kurz weggehen"
+    }
+  }
+}
