@@ -1,7 +1,7 @@
 {
   "title": "Break Time",
   "description": "Foundry VTT module to track when players have returned from break",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "authors": [
     {
       "name": "IronMonk",
@@ -35,16 +35,16 @@
     "breaktime.css"
   ],
   "url": "https://github.com/ironmonk88/breaktime",
-  "download": "https://github.com/ironmonk88/breaktime/archive/1.0.16.zip",
+  "download": "https://github.com/ironmonk88/breaktime/archive/1.0.17.zip",
   "manifest": "https://github.com/ironmonk88/breaktime/releases/latest/download/module.json",
   "bugs": "https://github.com/ironmonk88/breaktime/issues",
   "allowBugReporter": true,
   "id": "breaktime",
   "compatibility": {
-    "minimum": "10",
+    "minimum": "9",
     "verified": "10"
   },
   "name": "breaktime",
-  "minimumCoreVersion": "10",
+  "minimumCoreVersion": "9",
   "compatibleCoreVersion": "10"
 }
