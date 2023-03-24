@@ -1,3 +1,17 @@
+## Version 10.01
+
+Adding a sound effect for when break time is opened to warn players that break has started.
+
+Added the option to set when the game will resume, and how much time is left.
+
+Changed the breaktime window so you have to specify if you are away, otherwise it will leave you in an undefined state.
+
+Integrated with the individual away settings, so if you go away on a break, and breatime is started, then it will automatically set you to away.
+
+Added the option to set how you want to inform people you are taking a break.  Instead of just a chat message, you can change it to a notification, both or none.
+
+Fixed issue where the tooltip on the Token menu bar didn't update when you changed states.
+
 ## Version 1.0.15
 
 Adding support for v10

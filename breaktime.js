@@ -89,13 +89,61 @@ export class BreakTime {
         BreakTime.emit("closeApp");
     }
 
-    static showApp() {
+    static async showApp() {
         if (BreakTime.app == null)
             BreakTime.app = new BreakTimeApplication().render(true);
         else
             BreakTime.app.render(true);
+
+        /*
+        if (setting("slideshow") && game.modules.get("monks-enhanced-journal")?.active && !BreakTime.slideshow) {
+            BreakTime.slideshow = game.MonksEnhancedJournal.startSlideshow(setting("slideshow"));
+        }*/
+
+        if (setting("break-sound")) {
+            const audiofiles = await BreakTime.getBreakSounds();
+
+            //audiofiles = audiofiles.filter(i => (audiofiles.length === 1) || !(i === this._lastWildcard));
+            if (audiofiles.length > 0) {
+                const audiofile = audiofiles[Math.floor(Math.random() * audiofiles.length)];
+
+                let volume = (setting('volume') / 100);
+                AudioHelper.play({ src: audiofile, volume: volume });
+            }
+        }
+
         if (!game.user.isGM)
             ui.players.render();
+    }
+
+    static async getBreakSounds() {
+        const audiofile = setting('break-sound');
+
+        if (!audiofile.includes('*')) return [audiofile];
+        if (BreakTime.sounds) return BreakTime.sounds;
+        let source = "data";
+        let pattern = audiofile;
+        const browseOptions = { wildcard: true };
+
+        // Support S3 matching
+        if (/\.s3\./.test(pattern)) {
+            source = "s3";
+            const { bucket, keyPrefix } = FilePicker.parseS3URL(pattern);
+            if (bucket) {
+                browseOptions.bucket = bucket;
+                pattern = keyPrefix;
+            }
+        }
+
+        // Retrieve wildcard content
+        try {
+            const content = await FilePicker.browse(source, pattern, browseOptions);
+            BreakTime.sounds = content.files;
+        } catch (err) {
+            BreakTime.sounds = [];
+            ui.notifications.error(err);
+        }
+        return BreakTime.sounds;
     }
 
     static async closeApp() {
@@ -105,6 +153,13 @@ export class BreakTime {
             });
         } else
             BreakTime.app = null;
+
+        /*
+        if (setting("slideshow") && game.modules.get("monks-enhanced-journal")?.active && BreakTime.slideshow) {
+            BreakTime.slideshow.stopSlideshow();
+        }
+        */
+
         if (!game.user.isGM)
             ui.players.render();
     }
@@ -113,11 +168,34 @@ export class BreakTime {
         if (game.user.isGM) {
             let userId = data.userId || data.senderId || game.user.id;
             let state = (data.state != undefined ? data.state : !setting("break")[userId]);
-            let players = setting("break");
-            players[userId] = state;
-            await game.settings.set("breaktime", "break", players);
+            let breakData = setting("break");
+            breakData[userId] = state;
+            await game.settings.set("breaktime", "break", breakData);
+            if (state == "back") {
+                let awayData = setting("away");
+                if (awayData.includes(userId)) {
+                    awayData.findSplice((id) => id == userId);
+                    await game.settings.set("breaktime", "away", awayData);
+
+                    if (userId == game.user.id) {
+                        let tool = ui.controls.controls.find(c => c.name == 'token')?.tools.find(t => t.name == 'togglebreak');
+                        tool.title = (data.away ? "BREAKTIME.button.return" : "BREAKTIME.button.title");
+                        if (tool) tool.active = data.away;
+                        ui.controls.render();
+                    }
+                }
+            }
+            
             BreakTime.emit("refresh");
         }
+    }
+
+    static setRemaining(data = {}) {
+        BreakTime.emit("refresh");
+    }
+
+    static notify(data = {}) {
+        ui.notifications.warn(data.message);
     }
 
     static async stepAway(data = {}) {
@@ -139,14 +217,22 @@ export class BreakTime {
         if (userId == game.user.id) {
             const message = data.message || i18n(data.away ? setting("away-text") : setting("back-text"));
 
-            const messageData = {
-                content: message,
-                type: CONST.CHAT_MESSAGE_TYPES.OOC
-            };
-            ChatMessage.create(messageData);
+            if (["both", "chat"].includes(setting("notify-option"))) {
+                const messageData = {
+                    content: message,
+                    type: CONST.CHAT_MESSAGE_TYPES.OOC
+                };
+                ChatMessage.create(messageData);
+            }
+            if (["both", "toast"].includes(setting("notify-option"))) {
+                BreakTime.emit("notify", { message: `${game.user.name} - ${message}`});
+                //ui.notifications.warn(`${game.user.name} - ${message}`);
+            }
 
             let tool = ui.controls.controls.find(c => c.name == 'token')?.tools.find(t => t.name == 'togglebreak');
-            if(tool) tool.active = data.away;
+            $('#controls li[data-tool="togglebreak"]').attr("data-tooltip", (data.away ? "BREAKTIME.button.return" : "BREAKTIME.button.title"));
+            tool.title = (data.away ? "BREAKTIME.button.return" : "BREAKTIME.button.title");
+            if (tool) tool.active = data.away;
             ui.controls.render();
         }
     }
@@ -166,10 +252,11 @@ Hooks.once('setup', BreakTime.setup);
 Hooks.once('ready', BreakTime.ready);
 
 Hooks.on("getSceneControlButtons", (controls) => {
+    let awayData = setting("away");
     let tokenControls = controls.find(control => control.name === "token")
     tokenControls.tools.push({
         name: "togglebreak",
-        title: "BREAKTIME.button.title",
+        title: (awayData.includes(game.user.id) ? "BREAKTIME.button.return" : "BREAKTIME.button.title"),
         icon: "fas fa-door-open",
         onClick: (away) => {
             BreakTime.emit("stepAway", { away: away });
@@ -221,4 +308,28 @@ Hooks.on("chatCommandsReady", function (chatCommands) {
         iconClass: "fa-door-closed",
         description: i18n("BREAKTIME.app.chatback")
     }));
+});
+
+Hooks.on("renderSettingsConfig", (app, html, data) => {
+    let btn = $('<button>')
+        .addClass('file-picker')
+        .attr('type', 'button')
+        .attr('data-type', "imagevideo")
+        .attr('data-target', "img")
+        .attr('title', "Browse Files")
+        .attr('tabindex', "-1")
+        .html('<i class="fas fa-file-import fa-fw"></i>')
+        .click(function (event) {
+            const fp = new FilePicker({
+                type: "audio",
+                wildcard: true,
+                current: $(event.currentTarget).prev().val(),
+                callback: path => {
+                    $(event.currentTarget).prev().val(path);
+                }
+            });
+            return fp.browse();
+        });
+
+    btn.clone(true).insertAfter($('input[name="breaktime.break-sound"]', html));
 });

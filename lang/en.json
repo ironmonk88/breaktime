@@ -29,6 +29,21 @@
       },
       "back-text": {
         "name": "Back Message"
+      },
+      "slideshow": {
+        "name": "Slideshow"
+      },
+      "break-sound": {
+        "name": "Break Sound",
+        "hint": "Sound to play when a break is initiated"
+      },
+      "volume": {
+        "name": "Volume",
+        "hint": "Volume that the break time sound plays at"
+      },
+      "notify-option": {
+        "name": "Notification",
+        "hint": "How to notify others when you are away"
       }
     },
     "hotkey": {
@@ -37,7 +52,8 @@
       "pausekey": "Pause Key"
     },
     "button": {
-      "title": "Step Away for a minute"
+      "title": "Step Away for a minute",
+      "return":  "Return from break"
     }
   }
 }

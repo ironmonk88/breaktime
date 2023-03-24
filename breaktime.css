@@ -17,6 +17,10 @@
     border-left: 8px solid #468847;
 }
 
+.breaktime-player.away .breaktime-avatar {
+    border-left: 8px solid #bd362f;
+}
+
 .breaktime-player .breaktime-avatar img {
     width: 100%;
     height: 100%;
@@ -43,10 +47,15 @@
     color: #468847;
 }
 
+.breaktime-player.away .breaktime-state {
+    color: #bd362f;
+}
+
 .breaktime-marker {
     position: absolute;
+    font-size: 20px;
     top: 2px;
-    left: 12px;
+    right: 12px;
     color: #FFFFFF;
     text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
 }
@@ -67,4 +76,13 @@ form .notes.break-start {
 .breaktime-container {
     padding-top: 4px;
     border-top: 1px solid #C0C0C0;
+}
+
+.set-time {
+    width: 25px;
+    max-height: 25px;
+    height: 25px;
+    line-height: 20px;
+    padding: 2px 3px;
+    float: right;
 }

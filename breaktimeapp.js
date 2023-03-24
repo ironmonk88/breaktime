@@ -14,6 +14,7 @@ export class BreakTimeApplication extends Application {
     }
 
     getData() {
+        let awayData = setting("away");
         let me = null;
         const players = game.users.contents.filter((el) => el.active).map((el) => {
             const player = {
@@ -23,11 +24,14 @@ export class BreakTimeApplication extends Application {
                 color: el.color,
                 character: (el.isGM ? "GM" : el?.character?.name),
                 self: el.isSelf,
-                state: (setting('break')[el.id] || false),
+                state: (setting('break')[el.id] || (awayData.includes(el.id) ? "away" : "")),
             };
             if (el.id == game.user.id) me = player;
             return player;
         });
+
+        let remaining = setting("remaining") ? this.getRemainingTime() : null;
+
         return mergeObject(super.getData(), {
             players: players,
             my: me,
@@ -37,25 +41,70 @@ export class BreakTimeApplication extends Application {
                 minute: "numeric",
                 second: "numeric"
             }),
+            remaining: remaining
         });
     }
 
     activateListeners(html) {
         super.activateListeners(html);
-        this.element.find("#breaktime-btn").click(this._changeReturnedState.bind(this));
+        this.element.find("#back-btn").click(this._changeReturnedState.bind(this, 'back'));
+        this.element.find("#away-btn").click(this._changeReturnedState.bind(this, 'away'));
+
+        $('button.set-time', html).click(this.setTime.bind(this))
 
         if (game.user.isGM) {
-            this.element.find(".breaktime-avatar").click(this._changePlayerState.bind(this));
+            this.element.find(".breaktime-avatar").click(this._changePlayerState.bind(this, 'back')).contextmenu(this._changePlayerState.bind(this, 'away'));
+        } else {
+            this.element.find(`breaktime-player[data-user-id="${game.user.id}"] .breaktime-avatar`).click(this._changePlayerState.bind(this, 'back'));
+        }
+
+        if (setting("remaining")) {
+            if (this.remainingTimer)
+                window.clearInterval(this.remainingTimer);
+            this.remainingTimer = window.setInterval(() => {
+                let done;
+                $('.remaining-timer', html).val(this.getRemainingTime(done));
+                if (done) {
+                    window.clearInterval(this.remainingTimer);
+                }
+            }, 1000);
         }
     }
 
-    _changeReturnedState() {
-        BreakTime.emit("changeReturned");
+    getRemainingTime(done) {
+        let remaining = new Date(setting("remaining"));
+        let diff = Math.ceil((remaining - Date.now()) / 1000 / 60);
+        if (diff <= 0) {
+            done = true;
+            return "Break is over";
+        } else
+            return `Returning in: ${diff} min`;
     }
 
-    _changePlayerState(event) {
+    _changeReturnedState(state) {
+        BreakTime.emit("changeReturned", { userId: game.user.id, state: state });
+    }
+
+    _changePlayerState(state, event) {
         let playerId = event.currentTarget.closest('.breaktime-player').dataset.userId;
-        BreakTime.emit("changeReturned", { userId: playerId });
+        BreakTime.emit("changeReturned", { userId: playerId, state: state });
+    }
+
+    setTime() {
+        Dialog.confirm({
+            title: "Set Time Remaining",
+            content: `<p class="notes">Set the time remaining for this break (minutes)</p><input type="text" style="float:right; margin-bottom: 10px;text-align: right;width: 150px;" value="0"/> `,
+            yes: async (html) => {
+                let value = parseInt($('input', html).val());
+                if (isNaN(value) || value == 0)
+                    await game.settings.set("breaktime", "remaining", null);
+                else {
+                    let remaining = new Date(Date.now() + value * 60000);
+                    await game.settings.set("breaktime", "remaining", remaining);
+                }
+                BreakTime.emit("refresh");
+            }
+        });
     }
 
     async close(options = {}) {
@@ -63,7 +112,7 @@ export class BreakTimeApplication extends Application {
         if (game.user.isGM)
             BreakTime.endBreak();
         else {
-            if (options.ignore !== true) BreakTime.emit("changeReturned", { state: true });
+            if (options.ignore !== true) BreakTime.emit("changeReturned", { state: "back" });
         }
         BreakTime.app = null;
     }
