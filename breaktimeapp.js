@@ -55,7 +55,7 @@ export class BreakTimeApplication extends Application {
         if (game.user.isGM) {
             this.element.find(".breaktime-avatar").click(this._changePlayerState.bind(this, 'back')).contextmenu(this._changePlayerState.bind(this, 'away'));
         } else {
-            this.element.find(`breaktime-player[data-user-id="${game.user.id}"] .breaktime-avatar`).click(this._changePlayerState.bind(this, 'back'));
+            this.element.find(`.breaktime-player[data-user-id="${game.user.id}"] .breaktime-avatar`).click(this._changePlayerState.bind(this, 'back')).contextmenu(this._changePlayerState.bind(this, 'away'));
         }
 
         if (setting("remaining")) {
@@ -73,12 +73,15 @@ export class BreakTimeApplication extends Application {
 
     getRemainingTime(done) {
         let remaining = new Date(setting("remaining"));
-        let diff = Math.ceil((remaining - Date.now()) / 1000 / 60);
+        let diff = Math.ceil((remaining - Date.now()) / 1000);
         if (diff <= 0) {
             done = true;
             return "Break is over";
-        } else
-            return `Returning in: ${diff} min`;
+        } else {
+            let min = Math.ceil(diff / 60);
+            let sec = (diff > 120 ? null : diff % 60)
+            return `Returning in: ${min ? min : ""}${sec != null ? ":" + String(sec).padStart(2, '0') : " min"}`;
+        }
     }
 
     _changeReturnedState(state) {
@@ -93,7 +96,7 @@ export class BreakTimeApplication extends Application {
     setTime() {
         Dialog.confirm({
             title: "Set Time Remaining",
-            content: `<p class="notes">Set the time remaining for this break (minutes)</p><input type="text" style="float:right; margin-bottom: 10px;text-align: right;width: 150px;" value="0"/> `,
+            content: `<p class="notes">Set the time remaining for this break (minutes)</p><input type="text" style="float:right; margin-bottom: 10px;text-align: right;width: 150px;" value="${setting("break-time")}"/> `,
             yes: async (html) => {
                 let value = parseInt($('input', html).val());
                 if (isNaN(value) || value == 0)

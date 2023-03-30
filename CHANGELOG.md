@@ -1,3 +1,19 @@
+## Version 10.02
+
+Updated the styling so it's a little more obvious that you cn click on the avatar to come back, and right click to leave.
+
+Fixing issues clearing your personal away status if you return while breaktime app is displayed.
+
+Fixed issue with remaining time is still displaying when the dialog is opened a second time after the time has already expired.
+
+Fixed issue with players seeing the set remaining time button.
+
+Fixed issue with allowing players to click on their own avatar.
+
+Updated to show seconds when there's less than two minutes left.
+
+Added the option to set the default ammount of time to use for remaining time countdown.
+
 ## Version 10.01
 
 Adding a sound effect for when break time is opened to warn players that break has started.

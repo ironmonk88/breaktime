@@ -44,6 +44,10 @@
       "notify-option": {
         "name": "Notification",
         "hint": "How to notify others when you are away"
+      },
+      "break-time": {
+        "name": "Default Time",
+        "hint": "Default time to use as a placeholder when setting a time"
       }
     },
     "hotkey": {

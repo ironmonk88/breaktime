@@ -1,5 +1,8 @@
 <form class="flexcol" editable="{{editable}}">
-    <p class="notes break-start"><span style="line-height: 24px;">Break was started at {{timestart}}.</span><button type="button" class="set-time"><i class="fas fa-clock"></i></button></p>
+    <p class="notes break-start"><span style="line-height: 24px;">Break was started at {{timestart}}.</span>
+    {{#if gm}}
+    <button type="button" class="set-time"><i class="fas fa-clock"></i></button></p>
+    {{/if}}
     {{#if remaining}}
     <div class="form-group">
         <div class="form-fields">
@@ -10,7 +13,7 @@
     <div class="breaktime-container flexcol">
         {{#each players}}
         <div class="breaktime-player {{state}}" data-user-id="{{this.id}}">
-            <div class="breaktime-avatar">
+            <div class="breaktime-avatar {{#if (or @root.gm (eq this.id @root.my.id))}}clickable{{/if}}">
                 <img src="{{avatar}}" />
             </div>
             <div class="breaktime-details">

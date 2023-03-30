@@ -112,6 +112,14 @@ export const registerSettings = function () {
 		default: 60,
 		type: Number,
 	});
+	game.settings.register(modulename, "break-time", {
+		name: i18n("BREAKTIME.setting.break-time.name"),
+		hint: i18n("BREAKTIME.setting.break-time.hint"),
+		scope: "world",
+		config: true,
+		default: 5,
+		type: Number,
+	});
 
 	/*
 	game.settings.register(modulename, "slideshow", {

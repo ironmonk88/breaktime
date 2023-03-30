@@ -86,6 +86,7 @@ export class BreakTime {
         if (setting('auto-pause') && game.paused)
             game.togglePause(false, true);
         await game.settings.set("breaktime", "paused", false);
+        await game.settings.set("breaktime", "remaining", null);
         BreakTime.emit("closeApp");
     }
 
@@ -177,21 +178,13 @@ export class BreakTime {
                     awayData.findSplice((id) => id == userId);
                     await game.settings.set("breaktime", "away", awayData);
 
-                    if (userId == game.user.id) {
-                        let tool = ui.controls.controls.find(c => c.name == 'token')?.tools.find(t => t.name == 'togglebreak');
-                        tool.title = (data.away ? "BREAKTIME.button.return" : "BREAKTIME.button.title");
-                        if (tool) tool.active = data.away;
-                        ui.controls.render();
-                    }
+                    BreakTime.emit("refreshToolbar", {userId: userId});
+                    BreakTime.emit("refreshPlayerUI");
                 }
             }
             
             BreakTime.emit("refresh");
         }
-    }
-
-    static setRemaining(data = {}) {
-        BreakTime.emit("refresh");
     }
 
     static notify(data = {}) {
@@ -229,11 +222,7 @@ export class BreakTime {
                 //ui.notifications.warn(`${game.user.name} - ${message}`);
             }
 
-            let tool = ui.controls.controls.find(c => c.name == 'token')?.tools.find(t => t.name == 'togglebreak');
-            $('#controls li[data-tool="togglebreak"]').attr("data-tooltip", (data.away ? "BREAKTIME.button.return" : "BREAKTIME.button.title"));
-            tool.title = (data.away ? "BREAKTIME.button.return" : "BREAKTIME.button.title");
-            if (tool) tool.active = data.away;
-            ui.controls.render();
+            BreakTime.refreshToolbar({ userId: game.user.id });
         }
     }
 
@@ -244,6 +233,17 @@ export class BreakTime {
 
     static refreshPlayerUI() {
         ui.players.render();
+    }
+
+    static refreshToolbar(data) {
+        if (game.user.id == data.userId) {
+            let awayData = setting("away");
+            let away = awayData.includes(game.user.id);
+            let tool = ui.controls.controls.find(c => c.name == 'token')?.tools.find(t => t.name == 'togglebreak');
+            tool.title = (away ? "BREAKTIME.button.return" : "BREAKTIME.button.title");
+            if (tool) tool.active = away;
+            ui.controls.render();
+        }
     }
 }
 

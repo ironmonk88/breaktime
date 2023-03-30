@@ -13,6 +13,10 @@
     border-left: 8px solid #C0C0C0;
 }
 
+.breaktime-player .breaktime-avatar.clickable {
+    cursor: pointer;
+}
+
 .breaktime-player.back .breaktime-avatar {
     border-left: 8px solid #468847;
 }
