@@ -1,3 +1,15 @@
+## Version 10.03
+
+Fixed the footer button height when the breaktime window is popped out.
+
+Added the option to have multiple different away messages separated by a semicolon that will be picked randomly.
+
+Fixed issues where the toolbar was not updating properly for players.  And you had to click twice to get it to display properly.
+
+Added chat bubble feature so away messages can come from your token.
+
+Updated to be compliant with the latest version of Chat Commander
+
 ## Version 10.02
 
 Updated the styling so it's a little more obvious that you cn click on the avatar to come back, and right click to leave.

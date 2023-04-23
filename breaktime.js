@@ -191,6 +191,12 @@ export class BreakTime {
         ui.notifications.warn(data.message);
     }
 
+    static getRandomText(text) {
+        let parts = text.split(";");
+        let idx = Math.clamped(parseInt(Math.random() * parts.length), 0, parts.length - 1);
+        return parts[idx];
+    }
+
     static async stepAway(data = {}) {
         let userId = data.senderId || game.user.id;
 
@@ -204,25 +210,29 @@ export class BreakTime {
 
             await game.settings.set("breaktime", "away", players);
             BreakTime.emit("refreshPlayerUI");
+            BreakTime.emit("refreshToolbar", { userId: game.user.id });
         }
 
         //send message declaring if you're back
         if (userId == game.user.id) {
-            const message = data.message || i18n(data.away ? setting("away-text") : setting("back-text"));
+            const message = data.message || (data.away ? BreakTime.getRandomText(i18n(setting("away-text"))) : BreakTime.getRandomText(i18n(setting("back-text"))));
 
             if (["both", "chat"].includes(setting("notify-option"))) {
+                const speaker = setting("chat-bubble") ? { scene: canvas.scene.id, actor: game.user?.character?.id, alias: game.user?.name } : null;
                 const messageData = {
                     content: message,
-                    type: CONST.CHAT_MESSAGE_TYPES.OOC
+                    type: (setting("chat-bubble") ? CONST.CHAT_MESSAGE_TYPES.IC : CONST.CHAT_MESSAGE_TYPES.OOC),
+                    speaker
                 };
-                ChatMessage.create(messageData);
+                ChatMessage.create(messageData, { chatBubble: setting("chat-bubble") });
+
+                let tkn = canvas.scene.tokens.find(t => t.actor.id == game.user?.character?.id);
+                await canvas.hud.bubbles.say(tkn?._object, message);
             }
             if (["both", "toast"].includes(setting("notify-option"))) {
                 BreakTime.emit("notify", { message: `${game.user.name} - ${message}`});
                 //ui.notifications.warn(`${game.user.name} - ${message}`);
             }
-
-            BreakTime.refreshToolbar({ userId: game.user.id });
         }
     }
 
@@ -258,7 +268,7 @@ Hooks.on("getSceneControlButtons", (controls) => {
         name: "togglebreak",
         title: (awayData.includes(game.user.id) ? "BREAKTIME.button.return" : "BREAKTIME.button.title"),
         icon: "fas fa-door-open",
-        onClick: (away) => {
+        onClick: (away, event) => {
             BreakTime.emit("stepAway", { away: away });
         },
         toggle: true,
@@ -288,26 +298,52 @@ Hooks.on('renderPlayerList', async (playerList, html, data) => {
     }
 });
 
-Hooks.on("chatCommandsReady", function (chatCommands) {
-    chatCommands.registerCommand(chatCommands.createCommandFromData({
-        commandKey: "/brb",
-        invokeOnCommand: (chatlog, messageText, chatdata) => {
-            BreakTime.emit("stepAway", { away: true, message: messageText });
-        },
-        shouldDisplayToChat: false,
-        iconClass: "fa-door-open",
-        description: i18n("BREAKTIME.app.chataway")
-    }));
+Hooks.on("chatCommandsReady", function (commands) {
+    if (commands.register != undefined) {
+        commands.register({
+            name: "/brb",
+            module: "breaktime",
+            callback: (chatlog, parameters, messageData) => {
+                BreakTime.emit("stepAway", { away: true, message: parameters });
+                return true;
+            },
+            shouldDisplayToChat: false,
+            icon: '<i class="fas fa-door-open"></i>',
+            description: i18n("BREAKTIME.app.chataway")
+        });
 
-    chatCommands.registerCommand(chatCommands.createCommandFromData({
-        commandKey: "/back",
-        invokeOnCommand: (chatlog, messageText, chatdata) => {
-            BreakTime.emit("stepAway", { away: false, message: messageText });
-        },
-        shouldDisplayToChat: false,
-        iconClass: "fa-door-closed",
-        description: i18n("BREAKTIME.app.chatback")
-    }));
+        commands.register({
+            name: "/back",
+            module: "breaktime",
+            callback: (chatlog, parameters, chatdata) => {
+                BreakTime.emit("stepAway", { away: false, message: parameters });
+                return true;
+            },
+            shouldDisplayToChat: false,
+            icon: '<i class="fas fa-door-closed"></i>',
+            description: i18n("BREAKTIME.app.chatback")
+        });
+    } else {
+        commands.registerCommand(commands.createCommandFromData({
+            commandKey: "/brb",
+            invokeOnCommand: (chatlog, messageText, chatdata) => {
+                BreakTime.emit("stepAway", { away: true, message: messageText || setting("away-text") });
+            },
+            shouldDisplayToChat: false,
+            iconClass: "fa-door-open",
+            description: i18n("BREAKTIME.app.chataway")
+        }));
+
+        commands.registerCommand(commands.createCommandFromData({
+            commandKey: "/back",
+            invokeOnCommand: (chatlog, messageText, chatdata) => {
+                BreakTime.emit("stepAway", { away: false, message: messageText || setting("back-text") });
+            },
+            shouldDisplayToChat: false,
+            iconClass: "fa-door-closed",
+            description: i18n("BREAKTIME.app.chatback")
+        }));
+    }
 });
 
 Hooks.on("renderSettingsConfig", (app, html, data) => {

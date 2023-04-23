@@ -90,6 +90,14 @@ export const registerSettings = function () {
 		choices: notifyoptions,
 		config: true
 	});
+	game.settings.register(modulename, "chat-bubble", {
+		name: i18n("BREAKTIME.setting.chat-bubble.name"),
+		hint: i18n("BREAKTIME.setting.chat-bubble.hint"),
+		scope: "world",
+		default: false,
+		type: Boolean,
+		config: true
+	});
 	game.settings.register(modulename, "break-sound", {
 		name: i18n("BREAKTIME.setting.break-sound.name"),
 		hint: i18n("BREAKTIME.setting.break-sound.hint"),

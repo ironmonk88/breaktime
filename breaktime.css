@@ -90,3 +90,7 @@ form .notes.break-start {
     padding: 2px 3px;
     float: right;
 }
+
+#breaktime-app .window-content footer {
+    flex: 0 0 35px;
+}
