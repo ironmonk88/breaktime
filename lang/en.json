@@ -52,6 +52,10 @@
       "chat-bubble": {
         "name": "Chat Bubble",
         "hint": "Notify in chat bubble aswell"
+      },
+      "loop-sound": {
+        "name": "Loop Sound",
+        "hint": "Loop the breaktime sound so that it continues to play while the window is open"
       }
     },
     "hotkey": {

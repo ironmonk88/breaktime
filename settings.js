@@ -107,6 +107,14 @@ export const registerSettings = function () {
 		type: String,
 		//filePicker: 'audio',
 	});
+	game.settings.register(modulename, "loop-sound", {
+		name: i18n("BREAKTIME.setting.loop-sound.name"),
+		hint: i18n("BREAKTIME.setting.loop-sound.hint"),
+		scope: "world",
+		default: false,
+		type: Boolean,
+		config: true
+	});
 	game.settings.register(modulename, "volume", {
 		name: i18n("BREAKTIME.setting.volume.name"),
 		hint: i18n("BREAKTIME.setting.volume.hint"),

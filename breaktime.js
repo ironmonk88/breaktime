@@ -109,7 +109,20 @@ export class BreakTime {
                 const audiofile = audiofiles[Math.floor(Math.random() * audiofiles.length)];
 
                 let volume = (setting('volume') / 100);
-                AudioHelper.play({ src: audiofile, volume: volume });
+                AudioHelper.play({ src: audiofile, volume: volume, loop: setting("loop-sound") }).then((soundfile) => {
+                    if (game.modules.get("monks-sound-enhancements")?.active) {
+                        game.MonksSoundEnhancements.addSoundEffect(soundfile, "Breaktime");
+                    }
+                    BreakTime.sound = soundfile;
+                    soundfile.on("end", () => {
+                        delete BreakTime.sound;
+                    });
+                    soundfile.on("stop", () => {
+                        delete BreakTime.sound;
+                    });
+                    soundfile.effectiveVolume = volume;
+                    return soundfile;
+                });
             }
         }
 
@@ -154,6 +167,12 @@ export class BreakTime {
             });
         } else
             BreakTime.app = null;
+
+        if (BreakTime.sound && BreakTime.sound.stop) {
+            BreakTime.sound.fade(0, { duration: 500 }).then(() => {
+                BreakTime.sound.stop();
+            });
+        }
 
         /*
         if (setting("slideshow") && game.modules.get("monks-enhanced-journal")?.active && BreakTime.slideshow) {
@@ -226,7 +245,7 @@ export class BreakTime {
                 };
                 ChatMessage.create(messageData, { chatBubble: setting("chat-bubble") });
 
-                let tkn = canvas.scene.tokens.find(t => t.actor.id == game.user?.character?.id);
+                let tkn = canvas.scene.tokens.find(t => t.actor?.id == game.user?.character?.id);
                 await canvas.hud.bubbles.say(tkn?._object, message);
             }
             if (["both", "toast"].includes(setting("notify-option"))) {
@@ -283,7 +302,7 @@ Hooks.on('renderPlayerList', async (playerList, html, data) => {
     }
 
     setting("away").forEach((userId) => {
-        const styles = `flex:0 0 17px;width:17px;height:16px;border:0`;
+        const styles = `flex:0 0 17px;width:17px;height:16px;border:0;margin-top: 3px;margin-right:-5px;`;
         const title = i18n("BREAKTIME.app.playerisaway")
         const i = `<i style="${styles}" class="fas fa-door-open" title="${title}"></i>`;
         html.find(`[data-user-id="${userId}"]`).append(i);

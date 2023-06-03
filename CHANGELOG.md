@@ -1,3 +1,9 @@
+## Version 11.01
+
+Added the option to have the break time sound on repeat while the app is visible.
+
+Fixed issue when displaying chat bubbles with tokens that have no linked actors.
+
 ## Version 10.03
 
 Fixed the footer button height when the breaktime window is popped out.
