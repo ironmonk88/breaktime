@@ -1,3 +1,15 @@
+## Version 11.02
+
+Fixed breaktime display when characters have really really long character names.
+
+Added the option to play a playlist during the break, while pausing any currently playing tracks.  This replaces the option to loop the sound effect played when breaktime is started.
+
+Added an option to play a sound effect when the break is finished.
+
+Integrated with Monk's Sound Enhancements to control the volume of the sound played when a break is started or when the break time is up.
+
+Fixed issues with displaying the correct time in the count down.
+
 ## Version 11.01
 
 Added the option to have the break time sound on repeat while the app is visible.

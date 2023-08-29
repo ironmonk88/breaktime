@@ -41,6 +41,7 @@
     display: inline-block;
     padding-top: 5px;
     vertical-align: top;
+    width: calc(100% - 62px);
 }
 
 .breaktime-player .breaktime-state {
@@ -64,8 +65,10 @@
     text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
 }
 
-.breaktime-character{
-    font-size:10px;
+.breaktime-character {
+    font-size: 10px;
+    max-height: 25px;
+    overflow: hidden;
 }
 
 .breaktime-button:hover > * {

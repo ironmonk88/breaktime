@@ -37,6 +37,10 @@
         "name": "Break Sound",
         "hint": "Sound to play when a break is initiated"
       },
+      "end-break-sound": {
+        "name": "End Break Sound",
+        "hint": "Sound to play when the break time is up"
+      },
       "volume": {
         "name": "Volume",
         "hint": "Volume that the break time sound plays at"
@@ -53,9 +57,9 @@
         "name": "Chat Bubble",
         "hint": "Notify in chat bubble aswell"
       },
-      "loop-sound": {
-        "name": "Loop Sound",
-        "hint": "Loop the breaktime sound so that it continues to play while the window is open"
+      "break-playlist": {
+        "name": "Break Playlist",
+        "hint": "Playlist to play when a break is initiated"
       }
     },
     "hotkey": {

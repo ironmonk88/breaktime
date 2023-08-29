@@ -76,6 +76,20 @@ export class BreakTime {
             await game.settings.set("breaktime", "paused", true);
             BreakTime.emit("showApp");
 
+            let currentlyPlaying = ui.playlists._playingSounds.map(ps => ps.playing ? ps.uuid : null).filter(p => !!p);
+            for (let playing of currentlyPlaying) {
+                let sound = await fromUuid(playing);
+                sound.update({ playing: false, pausedTime: sound.sound.currentTime });
+            }
+            await game.settings.set("breaktime", "currently-playing", currentlyPlaying);
+
+            if (setting("break-playlist")) {
+                const playlist = game.playlists.get(setting("break-playlist"));
+                if (playlist) {
+                    playlist.playAll();
+                }
+            }
+
             //BreakTime.showDialog();
             if (setting('auto-pause'))
                 game.togglePause(true, true);
@@ -88,6 +102,21 @@ export class BreakTime {
         await game.settings.set("breaktime", "paused", false);
         await game.settings.set("breaktime", "remaining", null);
         BreakTime.emit("closeApp");
+        if (setting("break-playlist")) {
+            const playlist = game.playlists.get(setting("break-playlist"));
+            if (playlist) {
+                playlist.stopAll();
+            }
+        }
+
+        if (setting("currently-playing")) {
+            for (let playing of setting("currently-playing")) {
+                let sound = await fromUuid(playing);
+                if (sound)
+                    sound.parent?.playSound(sound);
+            }
+            await game.settings.set("breaktime", "currently-playing", null);
+        }
     }
 
     static async showApp() {
@@ -102,17 +131,13 @@ export class BreakTime {
         }*/
 
         if (setting("break-sound")) {
-            const audiofiles = await BreakTime.getBreakSounds();
+            const audiofiles = await BreakTime.getBreakSounds("break-sound");
 
-            //audiofiles = audiofiles.filter(i => (audiofiles.length === 1) || !(i === this._lastWildcard));
             if (audiofiles.length > 0) {
                 const audiofile = audiofiles[Math.floor(Math.random() * audiofiles.length)];
 
                 let volume = (setting('volume') / 100);
-                AudioHelper.play({ src: audiofile, volume: volume, loop: setting("loop-sound") }).then((soundfile) => {
-                    if (game.modules.get("monks-sound-enhancements")?.active) {
-                        game.MonksSoundEnhancements.addSoundEffect(soundfile, "Breaktime");
-                    }
+                AudioHelper.play({ src: audiofile, volume: volume, loop: false }).then((soundfile) => {
                     BreakTime.sound = soundfile;
                     soundfile.on("end", () => {
                         delete BreakTime.sound;
@@ -126,15 +151,43 @@ export class BreakTime {
             }
         }
 
+        BreakTime.endPlayed = false;
+
         if (!game.user.isGM)
             ui.players.render();
     }
 
-    static async getBreakSounds() {
-        const audiofile = setting('break-sound');
+    static async closeApp() {
+        if (BreakTime.app != null && BreakTime.app.rendered) {
+            BreakTime.app.close({ ignore: true }).then(() => {
+                BreakTime.app = null;
+            });
+        } else
+            BreakTime.app = null;
+
+        if (BreakTime.sound && BreakTime.sound.stop) {
+            BreakTime.sound.fade(0, { duration: 500 }).then(() => {
+                BreakTime.sound.stop();
+            });
+        }
+
+        BreakTime.endPlayed = false;
+
+        /*
+        if (setting("slideshow") && game.modules.get("monks-enhanced-journal")?.active && BreakTime.slideshow) {
+            BreakTime.slideshow.stopSlideshow();
+        }
+        */
+
+        if (!game.user.isGM)
+            ui.players.render();
+    }
+
+    static async getBreakSounds(fileSetting) {
+        const audiofile = setting(fileSetting);
 
         if (!audiofile.includes('*')) return [audiofile];
-        if (BreakTime.sounds) return BreakTime.sounds;
+        if (BreakTime[fileSetting]) return BreakTime[fileSetting];
         let source = "data";
         let pattern = audiofile;
         const browseOptions = { wildcard: true };
@@ -152,36 +205,12 @@ export class BreakTime {
         // Retrieve wildcard content
         try {
             const content = await FilePicker.browse(source, pattern, browseOptions);
-            BreakTime.sounds = content.files;
+            BreakTime[fileSetting] = content.files;
         } catch (err) {
-            BreakTime.sounds = [];
+            BreakTime[fileSetting] = [];
             ui.notifications.error(err);
         }
-        return BreakTime.sounds;
-    }
-
-    static async closeApp() {
-        if (BreakTime.app != null && BreakTime.app.rendered) {
-            BreakTime.app.close({ ignore: true }).then(() => {
-                BreakTime.app = null;
-            });
-        } else
-            BreakTime.app = null;
-
-        if (BreakTime.sound && BreakTime.sound.stop) {
-            BreakTime.sound.fade(0, { duration: 500 }).then(() => {
-                BreakTime.sound.stop();
-            });
-        }
-
-        /*
-        if (setting("slideshow") && game.modules.get("monks-enhanced-journal")?.active && BreakTime.slideshow) {
-            BreakTime.slideshow.stopSlideshow();
-        }
-        */
-
-        if (!game.user.isGM)
-            ui.players.render();
+        return BreakTime[fileSetting];
     }
 
     static async changeReturned(data) {
@@ -258,6 +287,8 @@ export class BreakTime {
     static refresh() {
         if (BreakTime.app && BreakTime.app.rendered)
             BreakTime.app.render();
+        BreakTime.canPlayEnd = true;
+        BreakTime.endPlayed = false;
     }
 
     static refreshPlayerUI() {
@@ -387,4 +418,25 @@ Hooks.on("renderSettingsConfig", (app, html, data) => {
         });
 
     btn.clone(true).insertAfter($('input[name="breaktime.break-sound"]', html));
+    btn.clone(true).insertAfter($('input[name="breaktime.end-break-sound"]', html));
+});
+
+Hooks.on("globalInterfaceVolumeChanged", (volume) => {
+    if (!game.modules.get("monks-sound-enhancements")?.active) {
+        if (BreakTime.sound) {
+            BreakTime.sound.volume = (BreakTime.sound.effectiveVolume ?? 1) * volume;
+        }
+        if (BreakTime.endSound) {
+            BreakTime.endSound.volume = (BreakTime.endSound.effectiveVolume ?? 1) * volume;
+        }
+    }
+});
+
+Hooks.on("globalSoundEffectVolumeChanged", (volume) => {
+    if (BreakTime.sound) {
+        BreakTime.sound.volume = (BreakTime.sound.effectiveVolume ?? 1) * volume;
+    }
+    if (BreakTime.endSound) {
+        BreakTime.endSound.volume = (BreakTime.endSound.effectiveVolume ?? 1) * volume;
+    }
 });

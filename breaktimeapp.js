@@ -30,7 +30,8 @@ export class BreakTimeApplication extends Application {
             return player;
         });
 
-        let remaining = setting("remaining") ? this.getRemainingTime() : null;
+        let done;
+        let remaining = setting("remaining") ? this.getRemainingTime(done, true) : null;
 
         return mergeObject(super.getData(), {
             players: players,
@@ -76,11 +77,33 @@ export class BreakTimeApplication extends Application {
         let diff = Math.ceil((remaining - Date.now()) / 1000);
         if (diff <= 0) {
             done = true;
+            if (!BreakTime.endPlayed && BreakTime.canPlayEnd && setting("end-break-sound") && setting("remaining")) {
+                BreakTime.endPlayed = true;
+                BreakTime.getBreakSounds("end-break-sound").then((audiofiles) => {
+                    if (audiofiles.length > 0) {
+                        const audiofile = audiofiles[Math.floor(Math.random() * audiofiles.length)];
+
+                        let volume = (setting('volume') / 100);
+                        AudioHelper.play({ src: audiofile, volume: volume, loop: false }).then((soundfile) => {
+                            BreakTime.endsound = soundfile;
+                            soundfile.on("end", () => {
+                                delete BreakTime.endsound;
+                            });
+                            soundfile.on("stop", () => {
+                                delete BreakTime.endsound;
+                            });
+                            soundfile.effectiveVolume = volume;
+                            return soundfile;
+                        });
+                    }
+                });
+            }
             return "Break is over";
         } else {
-            let min = Math.ceil(diff / 60);
-            let sec = (diff > 120 ? null : diff % 60)
-            return `Returning in: ${min ? min : ""}${sec != null ? ":" + String(sec).padStart(2, '0') : " min"}`;
+            const switchover = 120;
+            let min = diff > switchover ? Math.ceil(diff / 60) : Math.floor(diff / 60);
+            let sec = (diff > switchover ? null : diff % 60)
+            return `Returning in: ${min ? min : ""}${sec != null ? (min ? ":" : "") + String(sec).padStart(2, '0') + (min ? " min" : " sec") : " min"}`;
         }
     }
 
@@ -102,7 +125,7 @@ export class BreakTimeApplication extends Application {
                 if (isNaN(value) || value == 0)
                     await game.settings.set("breaktime", "remaining", null);
                 else {
-                    let remaining = new Date(Date.now() + value * 60000);
+                    let remaining = new Date(Date.now() + (value * 60000));
                     await game.settings.set("breaktime", "remaining", remaining);
                 }
                 BreakTime.emit("refresh");

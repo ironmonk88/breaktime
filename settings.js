@@ -4,8 +4,6 @@ export const registerSettings = function () {
     // Register any custom module settings here
 	let modulename = "breaktime";
 
-	const debouncedReload = foundry.utils.debounce(function () { window.location.reload(); }, 100);
-
 	let notifyoptions = {
 		'none': 'None',
 		'chat': 'Chat Message',
@@ -63,7 +61,7 @@ export const registerSettings = function () {
 		config: true,
 		default: true,
 		type: Boolean,
-		onChange: debouncedReload,
+		requiresReload: true
 	});
 
 	game.settings.register(modulename, "away-text", {
@@ -107,13 +105,29 @@ export const registerSettings = function () {
 		type: String,
 		//filePicker: 'audio',
 	});
-	game.settings.register(modulename, "loop-sound", {
-		name: i18n("BREAKTIME.setting.loop-sound.name"),
-		hint: i18n("BREAKTIME.setting.loop-sound.hint"),
+	game.settings.register(modulename, "break-playlist", {
+		name: i18n("BREAKTIME.setting.break-playlist.name"),
+		hint: i18n("BREAKTIME.setting.break-playlist.hint"),
 		scope: "world",
-		default: false,
-		type: Boolean,
+		default: "",
+		type: String,
+		choices: () => {
+			let playlists = game.playlists.reduce((obj, playlist) => {
+				obj[playlist.id] = playlist.name;
+				return obj;
+			}, {"": "-- None --"});
+			return playlists;
+		},
 		config: true
+	});
+	game.settings.register(modulename, "end-break-sound", {
+		name: i18n("BREAKTIME.setting.end-break-sound.name"),
+		hint: i18n("BREAKTIME.setting.end-break-sound.hint"),
+		scope: "world",
+		config: true,
+		default: "",
+		type: String,
+		//filePicker: 'audio',
 	});
 	game.settings.register(modulename, "volume", {
 		name: i18n("BREAKTIME.setting.volume.name"),
@@ -135,6 +149,12 @@ export const registerSettings = function () {
 		config: true,
 		default: 5,
 		type: Number,
+	});
+	game.settings.register(modulename, "currently-playing", {
+		scope: "world",
+		config: false,
+		default: "",
+		type: Object,
 	});
 
 	/*
