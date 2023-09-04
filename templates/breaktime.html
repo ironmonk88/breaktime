@@ -1,8 +1,10 @@
 <form class="flexcol" editable="{{editable}}">
-    <p class="notes break-start"><span style="line-height: 24px;">Break was started at {{timestart}}.</span>
-    {{#if gm}}
-    <button type="button" class="set-time"><i class="fas fa-clock"></i></button></p>
-    {{/if}}
+    <p class="notes break-start">
+        <span style="line-height: 24px;">Break was started at {{timestart}}.</span>
+        {{#if gm}}
+        <button type="button" class="set-time"><i class="fas fa-clock"></i></button>
+        {{/if}}
+    </p>
     {{#if remaining}}
     <div class="form-group">
         <div class="form-fields">

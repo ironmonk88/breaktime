@@ -1,3 +1,7 @@
+## Version 11.03
+
+Fixing issue with multiple breaktime icons appearing on the player list.
+
 ## Version 11.02
 
 Fixed breaktime display when characters have really really long character names.

@@ -11,34 +11,34 @@ export const registerSettings = function () {
 		'both': 'Chat & Notification'
 	};
 
-	game.settings.register("breaktime", "paused", {
+	game.settings.register(modulename, "paused", {
 		scope: "world",
 		config: false,
 		default: false,
 		type: Boolean,
 	});
 
-	game.settings.register("breaktime", "away", {
+	game.settings.register(modulename, "away", {
 		scope: "world",
 		config: false,
 		default: [],
 		type: Object,
 	});
 
-	game.settings.register("breaktime", "break", {
+	game.settings.register(modulename, "break", {
 		scope: "world",
 		config: false,
 		default: {},
 		type: Object,
 	});
 
-	game.settings.register("breaktime", "start", {
+	game.settings.register(modulename, "start", {
 		scope: "world",
 		config: false,
 		default: {},
 		type: Object,
 	});
-	game.settings.register("breaktime", "remaining", {
+	game.settings.register(modulename, "remaining", {
 		scope: "world",
 		config: false,
 		default: null,

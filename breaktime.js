@@ -340,10 +340,10 @@ Hooks.on('renderPlayerList', async (playerList, html, data) => {
         html.find(`[data-user-id="${userId}"] .player-active`).css({background:'transparent'});
     });
 
-    if (setting('show-button') && (game.user.isGM || (!game.user.isGM && setting("paused")))) {
+    if (setting('show-button') && (game.user.isGM || (!game.user.isGM && setting("paused"))) && $('.breaktime-button', html).length === 0) {
         $('<h3>').addClass('breaktime-button')
             .append(`<div><i class="fas fa-coffee"></i> ${i18n("BREAKTIME.app.breaktime")}</div>`)
-            .insertAfter($('h3', html))
+            .insertAfter($('h3:last', html))
             .click(game.user.isGM ? BreakTime.startBreak.bind() : BreakTime.showApp.bind());
     }
 });
