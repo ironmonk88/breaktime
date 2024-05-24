@@ -8,7 +8,7 @@
       "chataway": "Step away for a second",
       "chatback": "Return to the game",
       "playerisaway": "Player is currently away",
-      "LeaveAgain": "Leave Again",
+      "LeaveAgain": "Leave",
       "ImBack": "I'm Back"
     },
     "setting": {
@@ -60,6 +60,10 @@
       "break-playlist": {
         "name": "Break Playlist",
         "hint": "Playlist to play when a break is initiated"
+      },
+      "auto-start-time": {
+        "name": "Auto Break Time",
+        "hint": "Automatically start the timer when break is started"
       }
     },
     "hotkey": {

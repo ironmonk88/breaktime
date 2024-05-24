@@ -150,6 +150,16 @@ export const registerSettings = function () {
 		default: 5,
 		type: Number,
 	});
+
+	game.settings.register(modulename, "auto-start-time", {
+		name: i18n("BREAKTIME.setting.auto-start-time.name"),
+		hint: i18n("BREAKTIME.setting.auto-start-time.hint"),
+		scope: "world",
+		config: true,
+		default: false,
+		type: Boolean,
+	});
+
 	game.settings.register(modulename, "currently-playing", {
 		scope: "world",
 		config: false,

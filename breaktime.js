@@ -120,9 +120,18 @@ export class BreakTime {
     }
 
     static async showApp() {
-        if (BreakTime.app == null)
+        if (BreakTime.app == null) {
+            if (setting("auto-start-time")) {
+                let value = setting("break-time");
+                let remaining = setting("remaining");
+                if (remaining == null) {
+                    remaining = new Date(Date.now() + (value * 60000));
+                    await game.settings.set("breaktime", "remaining", remaining);
+                }
+            }
+
             BreakTime.app = new BreakTimeApplication().render(true);
-        else
+        } else
             BreakTime.app.render(true);
 
         /*
@@ -137,12 +146,12 @@ export class BreakTime {
                 const audiofile = audiofiles[Math.floor(Math.random() * audiofiles.length)];
 
                 let volume = (setting('volume') / 100);
-                AudioHelper.play({ src: audiofile, volume: volume, loop: false }).then((soundfile) => {
+                foundry.audio.AudioHelper.play({ src: audiofile, volume: volume, loop: false }).then((soundfile) => {
                     BreakTime.sound = soundfile;
-                    soundfile.on("end", () => {
+                    soundfile.addEventListener("end", () => {
                         delete BreakTime.sound;
                     });
-                    soundfile.on("stop", () => {
+                    soundfile.addEventListener("stop", () => {
                         delete BreakTime.sound;
                     });
                     soundfile.effectiveVolume = volume;
@@ -245,7 +254,15 @@ export class BreakTime {
         return parts[idx];
     }
 
-    static async stepAway(data = {}) {
+    static stepAway(message = "") {
+        this.adjustStatus({ away: true, message: message });
+    }
+
+    static comeBack(message = "") {
+        this.adjustStatus({ away: false, message: message });
+    }
+
+    static async adjustStatus(data = {}) {
         let userId = data.senderId || game.user.id;
 
         if (game.user.isGM) {
@@ -264,6 +281,13 @@ export class BreakTime {
         //send message declaring if you're back
         if (userId == game.user.id) {
             const message = data.message || (data.away ? BreakTime.getRandomText(i18n(setting("away-text"))) : BreakTime.getRandomText(i18n(setting("back-text"))));
+
+            let context = {
+                user: game.user
+            };
+
+            const compiled = Handlebars.compile(message);
+            message = compiled(context, { allowProtoMethodsByDefault: true, allowProtoPropertiesByDefault: true }).trim();
 
             if (["both", "chat"].includes(setting("notify-option"))) {
                 const speaker = setting("chat-bubble") ? { scene: canvas.scene.id, actor: game.user?.character?.id, alias: game.user?.name } : null;
@@ -317,9 +341,9 @@ Hooks.on("getSceneControlButtons", (controls) => {
     tokenControls.tools.push({
         name: "togglebreak",
         title: (awayData.includes(game.user.id) ? "BREAKTIME.button.return" : "BREAKTIME.button.title"),
-        icon: "fas fa-door-open",
+        icon: "fas fa-mug-hot",
         onClick: (away, event) => {
-            BreakTime.emit("stepAway", { away: away });
+            BreakTime.emit("adjustStatus", { away: away });
         },
         toggle: true,
         active: setting("away").includes(game.user.id)
@@ -335,7 +359,7 @@ Hooks.on('renderPlayerList', async (playerList, html, data) => {
     setting("away").forEach((userId) => {
         const styles = `flex:0 0 17px;width:17px;height:16px;border:0;margin-top: 3px;margin-right:-5px;`;
         const title = i18n("BREAKTIME.app.playerisaway")
-        const i = `<i style="${styles}" class="fas fa-door-open" title="${title}"></i>`;
+        const i = `<i style="${styles}" class="fas fa-mug-hot" title="${title}"></i>`;
         html.find(`[data-user-id="${userId}"]`).append(i);
         html.find(`[data-user-id="${userId}"] .player-active`).css({background:'transparent'});
     });
@@ -354,11 +378,11 @@ Hooks.on("chatCommandsReady", function (commands) {
             name: "/brb",
             module: "breaktime",
             callback: (chatlog, parameters, messageData) => {
-                BreakTime.emit("stepAway", { away: true, message: parameters });
+                BreakTime.emit("adjustStatus", { away: true, message: parameters });
                 return true;
             },
             shouldDisplayToChat: false,
-            icon: '<i class="fas fa-door-open"></i>',
+            icon: '<i class="fas fa-mug-hot"></i>',
             description: i18n("BREAKTIME.app.chataway")
         });
 
@@ -366,31 +390,31 @@ Hooks.on("chatCommandsReady", function (commands) {
             name: "/back",
             module: "breaktime",
             callback: (chatlog, parameters, chatdata) => {
-                BreakTime.emit("stepAway", { away: false, message: parameters });
+                BreakTime.emit("adjustStatus", { away: false, message: parameters });
                 return true;
             },
             shouldDisplayToChat: false,
-            icon: '<i class="fas fa-door-closed"></i>',
+            icon: '<i class="fas fa-mug-saucer"></i>',
             description: i18n("BREAKTIME.app.chatback")
         });
     } else {
         commands.registerCommand(commands.createCommandFromData({
             commandKey: "/brb",
             invokeOnCommand: (chatlog, messageText, chatdata) => {
-                BreakTime.emit("stepAway", { away: true, message: messageText || setting("away-text") });
+                BreakTime.emit("adjustStatus", { away: true, message: messageText || setting("away-text") });
             },
             shouldDisplayToChat: false,
-            iconClass: "fa-door-open",
+            iconClass: "fa-mug-hot",
             description: i18n("BREAKTIME.app.chataway")
         }));
 
         commands.registerCommand(commands.createCommandFromData({
             commandKey: "/back",
             invokeOnCommand: (chatlog, messageText, chatdata) => {
-                BreakTime.emit("stepAway", { away: false, message: messageText || setting("back-text") });
+                BreakTime.emit("adjustStatus", { away: false, message: messageText || setting("back-text") });
             },
             shouldDisplayToChat: false,
-            iconClass: "fa-door-closed",
+            iconClass: "fa-mug-saucer",
             description: i18n("BREAKTIME.app.chatback")
         }));
     }

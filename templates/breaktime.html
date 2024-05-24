@@ -2,6 +2,7 @@
     <p class="notes break-start">
         <span style="line-height: 24px;">Break was started at {{timestart}}.</span>
         {{#if gm}}
+        <button type="button" class="clear-remaining"><i class="fas fa-trash"></i></button>
         <button type="button" class="set-time"><i class="fas fa-clock"></i></button>
         {{/if}}
     </p>
@@ -29,7 +30,7 @@
         {{/each}}
     </div>
     <footer class="sheet-footer flexrow">
-        <button id="away-btn" type="button" {{#if (eq my.state "away")}} disabled{{/if}}><i class="fas fa-door-open"></i> {{localize 'BREAKTIME.app.LeaveAgain'}}</button>
-        <button id="back-btn" type="button" {{#if (eq my.state "back")}} disabled{{/if}}><i class="fas fa-door-closed"></i> {{localize 'BREAKTIME.app.ImBack'}}</button>
+        <button id="away-btn" type="button" {{#if (eq my.state "away")}} disabled{{/if}}><i class="fas fa-mug-hot"></i> {{localize 'BREAKTIME.app.LeaveAgain'}}</button>
+        <button id="back-btn" type="button" {{#if (eq my.state "back")}} disabled{{/if}}><i class="fas fa-mug-saucer"></i> {{localize 'BREAKTIME.app.ImBack'}}</button>
     </footer>
 </form>

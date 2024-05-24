@@ -1,3 +1,17 @@
+## Version 12.01
+
+v12 Compatibility
+
+Fixed spacing issues with user with realy long names
+
+Added the option to automatically start the timer when Breaktime is opened
+
+Added handlebar support for messages
+
+Changed the breaktime icon to be less confusing with the wall icon
+
+Added a button to clear all remaining time
+
 ## Version 11.03
 
 Fixing issue with multiple breaktime icons appearing on the player list.

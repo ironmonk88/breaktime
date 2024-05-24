@@ -85,7 +85,14 @@ form .notes.break-start {
     border-top: 1px solid #C0C0C0;
 }
 
-.set-time {
+.breaktime-name {
+    max-height: 35px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#breaktime-app .set-time,
+#breaktime-app .clear-remaining {
     width: 25px;
     max-height: 25px;
     height: 25px;

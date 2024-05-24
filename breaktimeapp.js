@@ -2,7 +2,7 @@ import { BreakTime, setting, i18n } from "./breaktime.js";
 
 export class BreakTimeApplication extends Application {
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions,
+        return foundry.utils.mergeObject(super.defaultOptions,
             {
                 title: i18n("BREAKTIME.app.title"),
                 id: "breaktime-app",
@@ -33,7 +33,7 @@ export class BreakTimeApplication extends Application {
         let done;
         let remaining = setting("remaining") ? this.getRemainingTime(done, true) : null;
 
-        return mergeObject(super.getData(), {
+        return foundry.utils.mergeObject(super.getData(), {
             players: players,
             my: me,
             gm: game.user.isGM,
@@ -51,7 +51,8 @@ export class BreakTimeApplication extends Application {
         this.element.find("#back-btn").click(this._changeReturnedState.bind(this, 'back'));
         this.element.find("#away-btn").click(this._changeReturnedState.bind(this, 'away'));
 
-        $('button.set-time', html).click(this.setTime.bind(this))
+        $('button.set-time', html).click(this.setTime.bind(this));
+        $('button.clear-remaining', html).click(this.clearRemaining.bind(this))
 
         if (game.user.isGM) {
             this.element.find(".breaktime-avatar").click(this._changePlayerState.bind(this, 'back')).contextmenu(this._changePlayerState.bind(this, 'away'));
@@ -84,12 +85,12 @@ export class BreakTimeApplication extends Application {
                         const audiofile = audiofiles[Math.floor(Math.random() * audiofiles.length)];
 
                         let volume = (setting('volume') / 100);
-                        AudioHelper.play({ src: audiofile, volume: volume, loop: false }).then((soundfile) => {
+                        foundry.audio.AudioHelper.play({ src: audiofile, volume: volume, loop: false }).then((soundfile) => {
                             BreakTime.endsound = soundfile;
-                            soundfile.on("end", () => {
+                            soundfile.addEventListener("end", () => {
                                 delete BreakTime.endsound;
                             });
-                            soundfile.on("stop", () => {
+                            soundfile.addEventListener("stop", () => {
                                 delete BreakTime.endsound;
                             });
                             soundfile.effectiveVolume = volume;
@@ -131,6 +132,11 @@ export class BreakTimeApplication extends Application {
                 BreakTime.emit("refresh");
             }
         });
+    }
+
+    async clearRemaining() {
+        await game.settings.set("breaktime", "remaining", 0);
+        BreakTime.emit("refresh");
     }
 
     async close(options = {}) {
