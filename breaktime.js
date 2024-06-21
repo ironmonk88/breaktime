@@ -280,7 +280,7 @@ export class BreakTime {
 
         //send message declaring if you're back
         if (userId == game.user.id) {
-            const message = data.message || (data.away ? BreakTime.getRandomText(i18n(setting("away-text"))) : BreakTime.getRandomText(i18n(setting("back-text"))));
+            let message = data.message || (data.away ? BreakTime.getRandomText(i18n(setting("away-text"))) : BreakTime.getRandomText(i18n(setting("back-text"))));
 
             let context = {
                 user: game.user
