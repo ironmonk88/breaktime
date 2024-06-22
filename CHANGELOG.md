@@ -1,3 +1,7 @@
+## Version 12.02
+
+Fixing an issue with a const variable
+
 ## Version 12.01
 
 v12 Compatibility
