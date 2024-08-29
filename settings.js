@@ -111,13 +111,13 @@ export const registerSettings = function () {
 		scope: "world",
 		default: "",
 		type: String,
-		choices: () => {
+		choices: (() => {
 			let playlists = game.playlists.reduce((obj, playlist) => {
 				obj[playlist.id] = playlist.name;
 				return obj;
 			}, {"": "-- None --"});
 			return playlists;
-		},
+		})(),
 		config: true
 	});
 	game.settings.register(modulename, "end-break-sound", {
