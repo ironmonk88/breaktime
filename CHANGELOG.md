@@ -1,3 +1,19 @@
+## Version 12.03
+
+Fixed issue with the break time start sound playing when player re-opens the breaktime window
+
+Fixed issue with the break time start sound playing when the player re-loads the page
+
+Fixed permission error that was preventing the break time window from showing when auto start time was turned on
+
+Fixed clamped warning
+
+Fixed Foundry issue not being able to populate the playlist dynamically
+
+Set the seconds count down to start 5 minutes until the end instead of 2 minutes.
+
+Fixed issue with the break time start sound not stopping when a player closes the window.
+
 ## Version 12.02
 
 Fixing an issue with a const variable

@@ -101,7 +101,7 @@ export class BreakTimeApplication extends Application {
             }
             return "Break is over";
         } else {
-            const switchover = 120;
+            const switchover = 300;
             let min = diff > switchover ? Math.ceil(diff / 60) : Math.floor(diff / 60);
             let sec = (diff > switchover ? null : diff % 60)
             return `Returning in: ${min ? min : ""}${sec != null ? (min ? ":" : "") + String(sec).padStart(2, '0') + (min ? " min" : " sec") : " min"}`;
@@ -145,6 +145,12 @@ export class BreakTimeApplication extends Application {
             BreakTime.endBreak();
         else {
             if (options.ignore !== true) BreakTime.emit("changeReturned", { state: "back" });
+
+            if (BreakTime.sound && BreakTime.sound.stop) {
+                BreakTime.sound.fade(0, { duration: 500 }).then(() => {
+                    BreakTime.sound.stop();
+                });
+            }
         }
         BreakTime.app = null;
     }

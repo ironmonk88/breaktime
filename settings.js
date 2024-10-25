@@ -1,7 +1,7 @@
-import { i18n } from "./breaktime.js";
+import { BreakTime, i18n } from "./breaktime.js";
 
 export const registerSettings = function () {
-    // Register any custom module settings here
+	// Register any custom module settings here
 	let modulename = "breaktime";
 
 	let notifyoptions = {
@@ -103,7 +103,7 @@ export const registerSettings = function () {
 		config: true,
 		default: "modules/breaktime/sounds/break.mp3",
 		type: String,
-		//filePicker: 'audio',
+		filePicker: 'audio',
 	});
 	game.settings.register(modulename, "break-playlist", {
 		name: i18n("BREAKTIME.setting.break-playlist.name"),
@@ -111,13 +111,7 @@ export const registerSettings = function () {
 		scope: "world",
 		default: "",
 		type: String,
-		choices: () => {
-			let playlists = game.playlists.reduce((obj, playlist) => {
-				obj[playlist.id] = playlist.name;
-				return obj;
-			}, {"": "-- None --"});
-			return playlists;
-		},
+		choices: [],
 		config: true
 	});
 	game.settings.register(modulename, "end-break-sound", {
@@ -127,7 +121,7 @@ export const registerSettings = function () {
 		config: true,
 		default: "",
 		type: String,
-		//filePicker: 'audio',
+		filePicker: 'audio',
 	});
 	game.settings.register(modulename, "volume", {
 		name: i18n("BREAKTIME.setting.volume.name"),
@@ -185,7 +179,7 @@ export const registerSettings = function () {
 						return { ...acc, [id]: name };
 					}, {})
 			};
-        },
+		},
 		type: String,
 	});
 	*/

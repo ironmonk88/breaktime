@@ -36,9 +36,10 @@ export class BreakTime {
 
     static async ready() {
         if (setting("paused")) {
-            BreakTime.showApp();
+            BreakTime.showApp(false);
         }
     }
+
 
     static emit(action, args = {}) {
         args.action = action;
@@ -119,9 +120,9 @@ export class BreakTime {
         }
     }
 
-    static async showApp() {
+    static async showApp(playSound = true) {
         if (BreakTime.app == null) {
-            if (setting("auto-start-time")) {
+            if (setting("auto-start-time") && game.user.isGM) {
                 let value = setting("break-time");
                 let remaining = setting("remaining");
                 if (remaining == null) {
@@ -139,7 +140,7 @@ export class BreakTime {
             BreakTime.slideshow = game.MonksEnhancedJournal.startSlideshow(setting("slideshow"));
         }*/
 
-        if (setting("break-sound")) {
+        if (setting("break-sound") && playSound) {
             const audiofiles = await BreakTime.getBreakSounds("break-sound");
 
             if (audiofiles.length > 0) {
@@ -250,7 +251,7 @@ export class BreakTime {
 
     static getRandomText(text) {
         let parts = text.split(";");
-        let idx = Math.clamped(parseInt(Math.random() * parts.length), 0, parts.length - 1);
+        let idx = Math.clamp(parseInt(Math.random() * parts.length), 0, parts.length - 1);
         return parts[idx];
     }
 
@@ -368,7 +369,7 @@ Hooks.on('renderPlayerList', async (playerList, html, data) => {
         $('<h3>').addClass('breaktime-button')
             .append(`<div><i class="fas fa-coffee"></i> ${i18n("BREAKTIME.app.breaktime")}</div>`)
             .insertAfter($('h3:last', html))
-            .click(game.user.isGM ? BreakTime.startBreak.bind() : BreakTime.showApp.bind());
+            .click(game.user.isGM ? BreakTime.startBreak.bind() : BreakTime.showApp.bind(this, false));
     }
 });
 
@@ -420,31 +421,6 @@ Hooks.on("chatCommandsReady", function (commands) {
     }
 });
 
-Hooks.on("renderSettingsConfig", (app, html, data) => {
-    let btn = $('<button>')
-        .addClass('file-picker')
-        .attr('type', 'button')
-        .attr('data-type', "imagevideo")
-        .attr('data-target', "img")
-        .attr('title', "Browse Files")
-        .attr('tabindex', "-1")
-        .html('<i class="fas fa-file-import fa-fw"></i>')
-        .click(function (event) {
-            const fp = new FilePicker({
-                type: "audio",
-                wildcard: true,
-                current: $(event.currentTarget).prev().val(),
-                callback: path => {
-                    $(event.currentTarget).prev().val(path);
-                }
-            });
-            return fp.browse();
-        });
-
-    btn.clone(true).insertAfter($('input[name="breaktime.break-sound"]', html));
-    btn.clone(true).insertAfter($('input[name="breaktime.end-break-sound"]', html));
-});
-
 Hooks.on("globalInterfaceVolumeChanged", (volume) => {
     if (!game.modules.get("monks-sound-enhancements")?.active) {
         if (BreakTime.sound) {
@@ -463,4 +439,12 @@ Hooks.on("globalSoundEffectVolumeChanged", (volume) => {
     if (BreakTime.endSound) {
         BreakTime.endSound.volume = (BreakTime.endSound.effectiveVolume ?? 1) * volume;
     }
+});
+
+Hooks.on("renderSettingsConfig", (app, html, data) => {
+    $("select[name='breaktime.break-playlist']", html).empty()
+        .append('<option value="">-- None --</option>')
+        .append(game.playlists.map((playlist) => {
+        return `<option value="${playlist.id}">${playlist.name}</option>`;
+        }).join("")).val(setting("break-playlist"));
 });
